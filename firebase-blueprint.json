@@ -1,0 +1,34 @@
+{
+  "collections": [
+    {
+      "name": "workers",
+      "fields": [
+        { "name": "name", "type": "string" },
+        { "name": "monthlySalary", "type": "number" },
+        { "name": "dailyAllowance", "type": "number" },
+        { "name": "joinDate", "type": "string" },
+        { "name": "status", "type": "string" },
+        { "name": "workerNumber", "type": "string" }
+      ],
+      "rules": {
+        "read": "true",
+        "write": "true"
+      }
+    },
+    {
+      "name": "records",
+      "fields": [
+        { "name": "workerId", "type": "string" },
+        { "name": "date", "type": "string" },
+        { "name": "attendance", "type": "string" },
+        { "name": "advancePayment", "type": "number" },
+        { "name": "discount", "type": "number" },
+        { "name": "note", "type": "string" }
+      ],
+      "rules": {
+        "read": "true",
+        "write": "true"
+      }
+    }
+  ]
+}

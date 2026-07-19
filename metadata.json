@@ -1,0 +1,6 @@
+{
+  "name": "نظام الحسابات وإدارة العمال",
+  "description": "نظام إدارة الموظفين والحسابات لمعمل هاشم الأحمدي",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
