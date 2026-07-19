@@ -127,13 +127,13 @@ export function Layout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 pb-20 lg:pb-8">
+        <main className="flex-1 overflow-auto print:overflow-visible p-4 sm:p-6 lg:p-8 pb-20 lg:pb-8 print:p-0 print:pb-0">
           <Outlet />
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 w-full bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe">
+      <nav className="lg:hidden print:hidden fixed bottom-0 left-0 right-0 w-full bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe">
         <div className="flex items-center justify-between h-16 px-1">
           {navItems.map((item) => (
             <NavLink
