@@ -1,16 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, CalendarPlus, FileSpreadsheet, FileText, Menu, X, Moon, Sun, Cloud, Check, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, Users, CalendarPlus, FileSpreadsheet, FileText, Menu, X, Moon, Sun, Cloud, Check, RefreshCw, Download } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useStore } from '../hooks/useStore';
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false); // Can be persisted later
+  const [isDark, setIsDark] = useState(false);
   const [cloudModalOpen, setCloudModalOpen] = useState(false);
   const [cloudUrl, setCloudUrl] = useState(localStorage.getItem('google_sheet_url') || 'https://script.google.com/macros/s/AKfycbwWkIwLCFG0cqNzOWzgmDb7qgpmURcoVyJNUbj1lXRR7LuLBTtf8hstrA0pA70XdlcC/exec');
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
 
   const { isSyncing, lastSyncTime, forceSync } = useStore();
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setInstallPrompt(null);
+    }
+  };
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -108,6 +131,15 @@ export function Layout() {
                   <span>غير متصل بالسحابة</span>
                 )}
               </div>
+              {installPrompt && (
+                <button 
+                  onClick={handleInstallClick}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-emerald-700 bg-emerald-100 rounded-lg hover:bg-emerald-200 transition-colors shadow-sm dark:bg-emerald-500/20 dark:text-emerald-400"
+                >
+                  <Download size={18} className="ml-2" />
+                  <span className="hidden sm:inline">تثبيت التطبيق</span>
+                </button>
+              )}
               <button 
                 onClick={toggleTheme}
                 className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-700 transition-colors"
