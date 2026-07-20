@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { useStore } from '../hooks/useStore';
 import { User, Calendar as CalendarIcon, Printer, Edit2, X, Check } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { ar } from 'date-fns/locale';
 import { DailyRecord, AttendanceStatus } from '../types';
 
 export default function Statements() {
@@ -197,7 +198,7 @@ export default function Statements() {
           {statementDataByMonth.map((statementData, index) => (
             <div 
               key={statementData.month} 
-              className={`space-y-6 print:block print:p-8 ${index > 0 ? 'mt-12 print:mt-0 border-t-4 border-dashed border-gray-200 print:border-none pt-12 print:pt-0' : ''}`}
+              className={`space-y-6 print:block print:p-0 ${index > 0 ? 'mt-12 print:mt-0 border-t-4 border-dashed border-gray-200 print:border-none pt-12 print:pt-0' : ''}`}
               style={index > 0 ? { pageBreakBefore: 'always', breakBefore: 'page' } : {}}
             >
               {/* Print Header - Only visible when printing/exporting */}
@@ -240,7 +241,7 @@ export default function Statements() {
 
               {/* Details Table */}
               <div className="bg-white dark:bg-slate-800 shadow-sm rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border-gray-300 print:rounded-lg">
-                <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/20 print:bg-gray-100 print:border-gray-300 flex justify-between items-center">
+                <div className="px-4 py-3 print:px-2 print:py-2 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/20 print:bg-gray-100 print:border-gray-300 flex justify-between items-center">
                   <h3 className="font-semibold text-gray-900 dark:text-white print:text-gray-900">تفاصيل الحركات اليومية ({statementData.month})</h3>
                 </div>
                 {statementData.records.length === 0 ? (
@@ -253,14 +254,14 @@ export default function Statements() {
                       <table className="min-w-full text-right divide-y divide-gray-200 dark:divide-slate-700 print:divide-gray-300">
                         <thead className="bg-gray-50 dark:bg-slate-900/50 print:bg-gray-200">
                           <tr>
-                            <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">التاريخ</th>
-                            <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">اليوم</th>
-                            <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الحضور</th>
-                            <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الصرفة</th>
-                            <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">السحبيات</th>
-                            <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">التأخير (دقيقة)</th>
-                            <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">ملاحظات</th>
-                            <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:hidden">إجراءات</th>
+                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">التاريخ</th>
+                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">اليوم</th>
+                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الحضور</th>
+                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الصرفة</th>
+                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">السحبيات</th>
+                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">التأخير (دقيقة)</th>
+                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">ملاحظات</th>
+                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:hidden">إجراءات</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-slate-700 print:divide-gray-200">
@@ -268,13 +269,13 @@ export default function Statements() {
                             const dateObj = parseISO(r.date);
                             return (
                               <tr key={r.id} className={`hover:bg-gray-50 dark:hover:bg-slate-700/50 print:hover:bg-transparent ${i % 2 === 0 ? 'print:bg-white' : 'print:bg-gray-50'}`}>
-                                <td className="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white print:text-gray-900">
+                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white print:text-gray-900">
                                   {r.date}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 print:text-gray-700">
-                                  {format(dateObj, 'EEEE')}
+                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 print:text-gray-700">
+                                  {format(dateObj, 'EEEE', { locale: ar })}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap">
+                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap">
                                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold
                                     ${r.attendance === 'full' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 print:bg-emerald-100 print:text-emerald-800 border print:border-emerald-200' : 
                                       r.attendance === 'half' ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 print:bg-amber-100 print:text-amber-800 border print:border-amber-200' : 
@@ -282,19 +283,19 @@ export default function Statements() {
                                     {r.attendance === 'full' ? 'حاضر' : r.attendance === 'half' ? 'نصف يوم' : 'غائب'}
                                   </span>
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-sm font-medium print:text-gray-900">
+                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm font-medium print:text-gray-900">
                                   {r.allowance && r.allowance > 0 ? <span className="text-red-500 print:text-red-700">{(r.allowance || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-sm font-medium print:text-gray-900">
+                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm font-medium print:text-gray-900">
                                   {r.advancePayment > 0 ? <span className="text-red-500 print:text-red-700">{(r.advancePayment || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-sm font-medium print:text-gray-900">
+                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm font-medium print:text-gray-900">
                                   {r.delayMinutes > 0 ? <span className="text-red-500 print:text-red-700">{(r.delayMinutes || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:max-w-[200px] print:truncate print:whitespace-normal">
+                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:whitespace-normal break-words">
                                   {r.note || <span className="text-gray-300 print:text-gray-200">-</span>}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-sm print:hidden">
+                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm print:hidden">
                                   <button onClick={() => openEditModal(r)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors">
                                     <Edit2 className="w-4 h-4" />
                                   </button>
@@ -315,7 +316,7 @@ export default function Statements() {
                             <div className="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                               <div className="flex flex-col">
                                 <span className="font-bold text-gray-900 dark:text-white" dir="ltr">{r.date}</span>
-                                <span className="text-xs text-gray-500">{format(dateObj, 'EEEE')}</span>
+                                <span className="text-xs text-gray-500">{format(dateObj, 'EEEE', { locale: ar })}</span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
@@ -374,7 +375,7 @@ export default function Statements() {
       {editingRecord && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b dark:border-slate-700">
+            <div className="flex items-center justify-between px-4 py-3 print:px-2 print:py-2 border-b dark:border-slate-700">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                 تعديل سجل {worker?.name}
               </h3>

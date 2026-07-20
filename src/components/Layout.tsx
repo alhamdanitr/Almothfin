@@ -61,7 +61,7 @@ export function Layout() {
   ];
 
   return (
-    <div className={cn("min-h-screen flex text-gray-900 bg-gray-50 print:block print:bg-white", isDark ? "dark:bg-slate-900 dark:text-slate-100" : "")} dir="rtl">
+    <div className={cn("min-h-screen print:min-h-0 flex text-gray-900 bg-gray-50 print:block print:bg-white", isDark ? "dark:bg-slate-900 dark:text-slate-100" : "")} dir="rtl">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
@@ -103,7 +103,7 @@ export function Layout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden print:overflow-visible print:block">
+      <div className="flex-1 flex flex-col min-h-screen print:min-h-0 overflow-hidden print:overflow-visible print:block">
         {/* Header */}
         <header className="flex items-center justify-between h-16 px-4 bg-white dark:bg-slate-800 shadow-sm sm:px-6 lg:px-8 print:hidden">
           <button 
