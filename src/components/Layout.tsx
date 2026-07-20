@@ -3,11 +3,14 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { LayoutDashboard, Users, CalendarPlus, FileSpreadsheet, FileText, Menu, X, Moon, Sun, Cloud, Check, RefreshCw, Download } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useStore } from '../hooks/useStore';
+import { SmartEntryModal } from './SmartEntryModal';
+import { Bot } from 'lucide-react';
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [cloudModalOpen, setCloudModalOpen] = useState(false);
+  const [smartModalOpen, setSmartModalOpen] = useState(false);
   const [cloudUrl, setCloudUrl] = useState(localStorage.getItem('google_sheet_url') || 'https://script.google.com/macros/s/AKfycbwWkIwLCFG0cqNzOWzgmDb7qgpmURcoVyJNUbj1lXRR7LuLBTtf8hstrA0pA70XdlcC/exec');
   const [installPrompt, setInstallPrompt] = useState<any>(null);
 
@@ -148,8 +151,15 @@ export function Layout() {
                 {isDark ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <button 
+                onClick={() => setSmartModalOpen(true)}
+                className="flex items-center px-3 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors shadow-sm"
+              >
+                <Bot size={18} className="ml-2" />
+                <span className="hidden sm:inline">المساعد الذكي</span>
+              </button>
+              <button 
                 onClick={() => setCloudModalOpen(true)}
-                className="flex items-center px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+                className="flex items-center px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 dark:text-indigo-400 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors shadow-sm"
               >
                 <Cloud size={18} className="ml-2" />
                 <span className="hidden sm:inline">الربط السحابي</span>
@@ -186,6 +196,9 @@ export function Layout() {
       </nav>
 
       {/* Cloud Settings Modal */}
+      
+      {smartModalOpen && <SmartEntryModal onClose={() => setSmartModalOpen(false)} />}
+
       {cloudModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">

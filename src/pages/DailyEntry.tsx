@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../hooks/useStore';
-import { Save, Calendar } from 'lucide-react';
+import { Save, Calendar, Bot, Wand2, Loader2, AlertCircle } from 'lucide-react';
 import { AttendanceStatus } from '../types';
 
 export default function DailyEntry() {
@@ -8,6 +8,10 @@ export default function DailyEntry() {
   
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [isSaving, setIsSaving] = useState(false);
+  
+  const [aiText, setAiText] = useState('');
+  const [isAiParsing, setIsAiParsing] = useState(false);
+  const [aiError, setAiError] = useState('');
   
   // Only show active workers
   const activeWorkers = useMemo(() => workers.filter(w => w.status !== 'inactive'), [workers]);
@@ -51,6 +55,59 @@ export default function DailyEntry() {
   const hasExistingRecords = useMemo(() => {
     return records.some(r => r.date === selectedDate);
   }, [records, selectedDate]);
+
+
+  const parseWithAi = async () => {
+    if (!aiText.trim()) return;
+    setIsAiParsing(true);
+    setAiError('');
+    try {
+      const response = await fetch('/api/parse-attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: aiText,
+          workers: activeWorkers,
+          fallbackDate: selectedDate
+        })
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'فشل الاتصال بالمساعد الذكي');
+      }
+      const data = await response.json();
+      
+      const newEntries = { ...entries };
+      let newDate = selectedDate;
+
+      if (data.records && Array.isArray(data.records)) {
+        data.records.forEach((record: any) => {
+          if (record.date) {
+              newDate = record.date;
+          }
+          if (record.workerId) {
+            newEntries[record.workerId] = {
+              attendance: record.attendance || 'full',
+              allowance: record.allowance !== undefined ? String(record.allowance) : (newEntries[record.workerId]?.allowance || ''),
+              advancePayment: record.advancePayment !== undefined ? String(record.advancePayment) : '',
+              delayMinutes: record.delayMinutes !== undefined ? String(record.delayMinutes) : '',
+              note: record.note || ''
+            };
+          }
+        });
+      }
+      
+      if (newDate !== selectedDate) {
+          setSelectedDate(newDate);
+      }
+      setEntries(newEntries);
+      setAiText(''); // clear on success
+    } catch (e: any) {
+      setAiError(e.message);
+    } finally {
+      setIsAiParsing(false);
+    }
+  };
 
   const handleEntryChange = (workerId: string, field: string, value: string) => {
     setEntries(prev => ({

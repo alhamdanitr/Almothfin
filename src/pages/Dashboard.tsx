@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { useStore } from '../hooks/useStore';
 import { Users, UserCheck, CreditCard, Wallet, TrendingUp, Edit2, X, Check } from 'lucide-react';
 import { DailyRecord, AttendanceStatus } from '../types';
+import { SmartEntryModal } from '../components/SmartEntryModal';
+import { Bot } from 'lucide-react';
 
 export default function Dashboard() {
   const { workers, records, updateRecord } = useStore();
@@ -10,6 +12,7 @@ export default function Dashboard() {
   const currentMonth = today.substring(0, 7); // YYYY-MM
 
   const [editingRecord, setEditingRecord] = useState<DailyRecord | null>(null);
+  const [smartModalOpen, setSmartModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     attendance: 'full' as AttendanceStatus,
     allowance: '',
@@ -100,6 +103,30 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+
+      {/* Smart Entry Banner */}
+      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-6 text-white shadow-md relative overflow-hidden group cursor-pointer" onClick={() => setSmartModalOpen(true)}>
+        <div className="absolute -right-4 -top-4 opacity-10 transform group-hover:scale-110 transition-transform duration-500">
+          <Bot size={120} />
+        </div>
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-bold mb-2 flex items-center">
+              <Bot className="ml-2 w-6 h-6" />
+              المساعد الذكي (AI)
+            </h3>
+            <p className="text-indigo-100 max-w-md text-sm">
+              قم بلصق نصوص الحضور والانصراف والصرفيات، وسيقوم الذكاء الاصطناعي بتحليلها وترحيلها تلقائياً.
+            </p>
+          </div>
+          <button className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+            فتح المساعد
+          </button>
+        </div>
+      </div>
+      
+      {smartModalOpen && <SmartEntryModal onClose={() => setSmartModalOpen(false)} />}
+
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">نظرة عامة</h2>
         <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
