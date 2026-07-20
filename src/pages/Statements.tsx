@@ -195,7 +195,11 @@ export default function Statements() {
       {statementDataByMonth && statementDataByMonth.length > 0 ? (
         <div ref={printRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 print:text-black print:bg-white" dir="rtl">
           {statementDataByMonth.map((statementData, index) => (
-            <div key={statementData.month} className={`space-y-6 print:block print:p-8 ${index > 0 ? 'print:break-before-page mt-12 print:mt-0 border-t-4 border-dashed border-gray-200 print:border-none pt-12 print:pt-0' : ''}`}>
+            <div 
+              key={statementData.month} 
+              className={`space-y-6 print:block print:p-8 ${index > 0 ? 'mt-12 print:mt-0 border-t-4 border-dashed border-gray-200 print:border-none pt-12 print:pt-0' : ''}`}
+              style={index > 0 ? { pageBreakBefore: 'always', breakBefore: 'page' } : {}}
+            >
               {/* Print Header - Only visible when printing/exporting */}
               <div className="hidden print:flex flex-col items-center justify-center border-b-2 border-gray-800 pb-6 mb-6">
                 <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">معمل هاشم الاحمدي للتطريز الالكتروني</h1>

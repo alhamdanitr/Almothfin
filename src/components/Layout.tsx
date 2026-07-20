@@ -61,7 +61,7 @@ export function Layout() {
   ];
 
   return (
-    <div className={cn("min-h-screen flex text-gray-900 bg-gray-50", isDark ? "dark:bg-slate-900 dark:text-slate-100" : "")} dir="rtl">
+    <div className={cn("min-h-screen flex text-gray-900 bg-gray-50 print:block print:bg-white", isDark ? "dark:bg-slate-900 dark:text-slate-100" : "")} dir="rtl">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
@@ -72,7 +72,7 @@ export function Layout() {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 right-0 z-50 w-64 bg-white dark:bg-slate-800 shadow-xl transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
+        "fixed inset-y-0 right-0 z-50 w-64 bg-white dark:bg-slate-800 shadow-xl transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 print:hidden",
         sidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
       )}>
         <div className="flex items-center justify-between h-16 px-6 border-b dark:border-slate-700">
@@ -103,9 +103,9 @@ export function Layout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden print:overflow-visible print:block">
         {/* Header */}
-        <header className="flex items-center justify-between h-16 px-4 bg-white dark:bg-slate-800 shadow-sm sm:px-6 lg:px-8">
+        <header className="flex items-center justify-between h-16 px-4 bg-white dark:bg-slate-800 shadow-sm sm:px-6 lg:px-8 print:hidden">
           <button 
             className="p-2 -mr-2 text-gray-500 rounded-md lg:hidden hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-slate-700 dark:text-gray-400"
             onClick={() => setSidebarOpen(true)}
