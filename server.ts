@@ -45,9 +45,10 @@ Rules:
    - If the text says "نصف" or "داوم ساعتين" or implies a partial day, set 'attendance' to 'half'.
    - Otherwise, default to 'full' (حاضر).
 3. Payments: 
-   - Any number directly next to a worker's name (e.g. 4000) represents a financial amount (usually advance payment / سحبيات). Assign this number to 'advancePayment'.
-   - If a specific allowance (صرفة) is mentioned, map it to 'allowance'.
-   - Ensure the amount is mapped exactly to the person it appears next to.
+   - There are two distinct types of payments: "سحبيات" (Advance Payment) and "صرفة" (Allowance).
+   - 'advancePayment' (سحبيات): A general financial amount taken by the worker. If a number appears next to a name without the word "صرفة", treat it as 'advancePayment' (e.g., "محمد 4000" means advancePayment: 4000).
+   - 'allowance' (صرفة): An allowance is ONLY recorded if the word "صرفة" is explicitly mentioned with an amount (e.g., "محمد صرفة 2000" means allowance: 2000).
+   - Do NOT combine them. If both exist, parse both.
 4. Delays:
    - If the text mentions a delay (تأخير / تاخير) in hours or minutes (e.g., "تأخير ساعتين", "تاخير ساعة ونص", "تأخير نصف ساعة"), convert it to minutes and set 'delayMinutes' (e.g., "ساعتين" = 120, "ساعة" = 60, "ساعة ونص" = 90).
 5. Date parsing: If the text contains a date (e.g. "السبت 18/7" or "18-7"), parse it into YYYY-MM-DD format using the current year (2026). If there is absolutely no date, use the '${fallbackDate}'.
@@ -64,11 +65,12 @@ Return JSON matching this schema exactly. Do not output markdown, just the JSON 
                 workerId: { type: Type.STRING },
                 date: { type: Type.STRING, description: "YYYY-MM-DD" },
                 attendance: { type: Type.STRING, description: "'full' or 'half' or 'absent'" },
-                advancePayment: { type: Type.NUMBER },
+                advancePayment: { type: Type.NUMBER, description: "General advance payment (سحبيات)" },
+                allowance: { type: Type.NUMBER, description: "Specific allowance (صرفة)" },
                 delayMinutes: { type: Type.NUMBER },
                 note: { type: Type.STRING }
               },
-              required: ["workerId", "date", "attendance", "advancePayment"]
+              required: ["workerId", "date", "attendance"]
             }
           }
         }
@@ -77,7 +79,18 @@ Return JSON matching this schema exactly. Do not output markdown, just the JSON 
       res.json({ records: JSON.parse(response.text || "[]") });
     } catch (e: any) {
       console.error(e);
-      res.status(500).json({ error: e.message });
+      let errorMessage = e.message;
+      try {
+        const parsed = JSON.parse(e.message);
+        if (parsed.error && parsed.error.message) {
+          errorMessage = parsed.error.message;
+        } else if (parsed.message) {
+          errorMessage = parsed.message;
+        }
+      } catch (parseErr) {
+        // Not JSON
+      }
+      res.status(500).json({ error: errorMessage });
     }
   });
 
