@@ -33,6 +33,11 @@ export function SmartEntryModal({ onClose }: SmartEntryModalProps) {
         })
       });
       
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("عذراً، الخادم لا يستجيب بشكل صحيح. (ملاحظة: هذا التطبيق يتطلب خادم Backend ولا يعمل كصفحة ثابتة فقط)");
+      }
+      
       if (!response.ok) {
         const err = await response.json();
         throw new Error(err.error || 'فشل الاتصال بالمساعد الذكي');
