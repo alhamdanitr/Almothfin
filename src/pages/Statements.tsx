@@ -17,7 +17,7 @@ export default function Statements() {
     attendance: 'full' as AttendanceStatus,
     allowance: '',
     advancePayment: '',
-    discount: '',
+    delayMinutes: '',
     note: ''
   });
 
@@ -29,7 +29,7 @@ export default function Statements() {
       attendance: record.attendance,
       allowance: String(record.allowance !== undefined ? record.allowance : ''),
       advancePayment: String(record.advancePayment || ''),
-      discount: String(record.discount || ''),
+      delayMinutes: String(record.delayMinutes || ''),
       note: record.note || ''
     });
   };
@@ -45,7 +45,7 @@ export default function Statements() {
         attendance: formData.attendance,
         allowance: Number(formData.allowance) || 0,
         advancePayment: Number(formData.advancePayment) || 0,
-        discount: Number(formData.discount) || 0,
+        delayMinutes: Number(formData.delayMinutes) || 0,
         note: formData.note
       });
       closeEditModal();
@@ -87,7 +87,10 @@ export default function Statements() {
       monthRecords.forEach(r => {
         totalAdvances += Number(r.advancePayment || 0);
         totalAllowance += Number(r.allowance || 0);
-        totalDiscounts += Number(r.discount || 0);
+        
+        const delayMins = Number(r.delayMinutes || 0);
+        const discountAmount = (delayMins / 720) * dailyRate;
+        totalDiscounts += discountAmount;
         
         if (r.attendance === 'full') {
           daysPresent++;
@@ -109,7 +112,7 @@ export default function Statements() {
           totalEarned: Math.round(totalEarned),
           totalAdvances,
           totalAllowance,
-          totalDiscounts,
+          totalDiscounts: Math.round(totalDiscounts),
           netSalary: Math.round(netSalary),
           daysPresent,
           daysHalf,
@@ -251,7 +254,7 @@ export default function Statements() {
                             <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الحضور</th>
                             <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الصرفة</th>
                             <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">السحبيات</th>
-                            <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الخصم</th>
+                            <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">التأخير (دقيقة)</th>
                             <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">ملاحظات</th>
                             <th className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-300 print:hidden">إجراءات</th>
                           </tr>
@@ -282,7 +285,7 @@ export default function Statements() {
                                   {r.advancePayment > 0 ? <span className="text-red-500 print:text-red-700">{(r.advancePayment || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
                                 <td className="px-6 py-3 whitespace-nowrap text-sm font-medium print:text-gray-900">
-                                  {r.discount > 0 ? <span className="text-red-500 print:text-red-700">{(r.discount || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
+                                  {r.delayMinutes > 0 ? <span className="text-red-500 print:text-red-700">{(r.delayMinutes || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
                                 <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:max-w-[200px] print:truncate print:whitespace-normal">
                                   {r.note || <span className="text-gray-300 print:text-gray-200">-</span>}
@@ -336,9 +339,9 @@ export default function Statements() {
                                 </span>
                               </div>
                               <div className="bg-gray-50 dark:bg-slate-900/50 p-2 rounded-lg text-center">
-                                <span className="block text-xs text-gray-500 dark:text-gray-400 mb-1">الخصم</span>
-                                <span className={r.discount > 0 ? "text-red-500 font-medium" : "text-gray-600 dark:text-gray-300"}>
-                                  {r.discount > 0 ? r.discount.toLocaleString() : '-'}
+                                <span className="block text-xs text-gray-500 dark:text-gray-400 mb-1">التأخير (دقيقة)</span>
+                                <span className={r.delayMinutes > 0 ? "text-red-500 font-medium" : "text-gray-600 dark:text-gray-300"}>
+                                  {r.delayMinutes > 0 ? r.delayMinutes.toLocaleString() : '-'}
                                 </span>
                               </div>
                             </div>
@@ -424,12 +427,12 @@ export default function Statements() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">الخصم (د.ع)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">التأخير (دقيقة)</label>
                   <input 
                     type="number"
                     min="0"
-                    value={formData.discount}
-                    onChange={(e) => setFormData({...formData, discount: e.target.value})}
+                    value={formData.delayMinutes}
+                    onChange={(e) => setFormData({...formData, delayMinutes: e.target.value})}
                     className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white"
                   />
                 </div>

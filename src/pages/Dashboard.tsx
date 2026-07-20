@@ -14,7 +14,7 @@ export default function Dashboard() {
     attendance: 'full' as AttendanceStatus,
     allowance: '',
     advancePayment: '',
-    discount: '',
+    delayMinutes: '',
     note: ''
   });
 
@@ -24,7 +24,7 @@ export default function Dashboard() {
       attendance: record.attendance,
       allowance: String(record.allowance !== undefined ? record.allowance : ''),
       advancePayment: String(record.advancePayment || ''),
-      discount: String(record.discount || ''),
+      delayMinutes: String(record.delayMinutes || ''),
       note: record.note || ''
     });
   };
@@ -40,7 +40,7 @@ export default function Dashboard() {
         attendance: formData.attendance,
         allowance: Number(formData.allowance) || 0,
         advancePayment: Number(formData.advancePayment) || 0,
-        discount: Number(formData.discount) || 0,
+        delayMinutes: Number(formData.delayMinutes) || 0,
         note: formData.note
       });
       closeEditModal();
@@ -66,7 +66,6 @@ export default function Dashboard() {
     thisMonthRecords.forEach(r => {
       totalAdvancesMonth += Number(r.advancePayment || 0);
       totalAllowanceMonth += Number(r.allowance || 0);
-      totalDiscounts += Number(r.discount || 0);
       
       const worker = workers.find(w => w.id === r.workerId);
       if (worker) {
@@ -74,10 +73,14 @@ export default function Dashboard() {
         const dailyRate = (worker.monthlySalary || 0) / 30; // Assuming 30 days
         if (r.attendance === 'full') earnedSalaries += dailyRate;
         else if (r.attendance === 'half') earnedSalaries += (dailyRate / 2);
+        
+        // Calculate financial discount based on delay minutes (12 hours = 720 mins)
+        const discountAmount = ((Number(r.delayMinutes || 0)) / 720) * dailyRate;
+        totalDiscounts += discountAmount;
       }
     });
 
-    const remainingSalariesMonth = earnedSalaries - totalAdvancesMonth - totalAllowanceMonth - totalDiscounts;
+    const remainingSalariesMonth = Math.round(earnedSalaries - totalAdvancesMonth - totalAllowanceMonth - totalDiscounts);
 
     return {
       totalWorkers: activeWorkers.length,
@@ -140,7 +143,7 @@ export default function Dashboard() {
                     <th className="pb-3 px-4">الحضور</th>
                     <th className="pb-3 px-4">الصرفة</th>
                     <th className="pb-3 px-4">السحبيات</th>
-                    <th className="pb-3 pl-4">الخصم</th>
+                    <th className="pb-3 pl-4">التأخير (دقيقة)</th>
                     <th className="pb-3 pl-4">تعديل</th>
                   </tr>
                 </thead>
@@ -171,8 +174,8 @@ export default function Dashboard() {
                           ) : '-'}
                         </td>
                         <td className="py-3 pl-4 text-gray-600 dark:text-gray-300">
-                          {record.discount > 0 ? (
-                            <span className="text-red-500 font-medium">{(record.discount || 0).toLocaleString()}</span>
+                          {record.delayMinutes > 0 ? (
+                            <span className="text-red-500 font-medium">{(record.delayMinutes || 0).toLocaleString()}</span>
                           ) : '-'}
                         </td>
                         <td className="py-3 pl-4">
@@ -223,9 +226,9 @@ export default function Dashboard() {
                         </span>
                       </div>
                       <div className="bg-gray-50 dark:bg-slate-900/50 p-2 rounded-lg text-center">
-                        <span className="block text-xs text-gray-500 dark:text-gray-400 mb-1">الخصم</span>
-                        <span className={record.discount > 0 ? "text-red-500 font-medium" : "text-gray-600 dark:text-gray-300"}>
-                          {record.discount > 0 ? record.discount.toLocaleString() : '-'}
+                        <span className="block text-xs text-gray-500 dark:text-gray-400 mb-1">التأخير (دقيقة)</span>
+                        <span className={record.delayMinutes > 0 ? "text-red-500 font-medium" : "text-gray-600 dark:text-gray-300"}>
+                          {record.delayMinutes > 0 ? record.delayMinutes.toLocaleString() : '-'}
                         </span>
                       </div>
                     </div>
@@ -298,12 +301,12 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">الخصم (د.ع)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">التأخير (دقيقة)</label>
                   <input 
                     type="number"
                     min="0"
-                    value={formData.discount}
-                    onChange={(e) => setFormData({...formData, discount: e.target.value})}
+                    value={formData.delayMinutes}
+                    onChange={(e) => setFormData({...formData, delayMinutes: e.target.value})}
                     className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white"
                   />
                 </div>

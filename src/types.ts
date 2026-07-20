@@ -17,7 +17,7 @@ export interface DailyRecord {
   attendance: AttendanceStatus;
   advancePayment: number; // السحبيات
   allowance?: number; // الصرفة
-  discount: number; // الخصومات
+  delayMinutes?: number; // التأخير بالدقائق
   note: string;
 }
 

@@ -17,7 +17,7 @@ export default function DailyEntry() {
     attendance: AttendanceStatus,
     allowance: string,
     advancePayment: string,
-    discount: string,
+    delayMinutes: string,
     note: string
   }>>({});
 
@@ -32,7 +32,7 @@ export default function DailyEntry() {
           attendance: existing.attendance,
           allowance: String(existing.allowance !== undefined ? existing.allowance : ''),
           advancePayment: String(existing.advancePayment || ''),
-          discount: String(existing.discount || ''),
+          delayMinutes: String(existing.delayMinutes || ''),
           note: existing.note || ''
         };
       } else {
@@ -40,7 +40,7 @@ export default function DailyEntry() {
           attendance: 'full',
           allowance: worker.dailyAllowance > 0 ? String(worker.dailyAllowance) : '',
           advancePayment: '',
-          discount: '',
+          delayMinutes: '',
           note: ''
         };
       }
@@ -56,7 +56,7 @@ export default function DailyEntry() {
     setEntries(prev => ({
       ...prev,
       [workerId]: {
-        ...(prev[workerId] || { attendance: 'full', allowance: '', advancePayment: '', discount: '', note: '' }),
+        ...(prev[workerId] || { attendance: 'full', allowance: '', advancePayment: '', delayMinutes: '', note: '' }),
         [field]: value
       }
     }));
@@ -75,7 +75,7 @@ export default function DailyEntry() {
           attendance: entry.attendance,
           allowance: Number(entry.allowance) || 0,
           advancePayment: Number(entry.advancePayment) || 0,
-          discount: Number(entry.discount) || 0,
+          delayMinutes: Number(entry.delayMinutes) || 0,
           note: entry.note
         });
       }
@@ -145,13 +145,13 @@ export default function DailyEntry() {
                 <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">الحضور</th>
                 <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">الصرفة (د.ع)</th>
                 <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">السحبيات (د.ع)</th>
-                <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">الخصم (د.ع)</th>
+                <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">التأخير (دقيقة)</th>
                 <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[25%]">ملاحظات</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-slate-700/50">
               {activeWorkers.map((worker) => {
-                const entry = entries[worker.id] || { attendance: 'full', allowance: '', advancePayment: '', discount: '', note: '' };
+                const entry = entries[worker.id] || { attendance: 'full', allowance: '', advancePayment: '', delayMinutes: '', note: '' };
                 return (
                   <tr key={worker.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
@@ -197,8 +197,8 @@ export default function DailyEntry() {
                         type="number"
                         min="0"
                         placeholder="0"
-                        value={entry.discount}
-                        onChange={(e) => handleEntryChange(worker.id, 'discount', e.target.value)}
+                        value={entry.delayMinutes}
+                        onChange={(e) => handleEntryChange(worker.id, 'delayMinutes', e.target.value)}
                         className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white transition-colors"
                       />
                     </td>
@@ -221,7 +221,7 @@ export default function DailyEntry() {
         {/* Mobile Cards */}
         <div className="lg:hidden divide-y divide-gray-100 dark:divide-slate-700/50">
           {activeWorkers.map((worker) => {
-            const entry = entries[worker.id] || { attendance: 'full', allowance: '', advancePayment: '', discount: '', note: '' };
+            const entry = entries[worker.id] || { attendance: 'full', allowance: '', advancePayment: '', delayMinutes: '', note: '' };
             return (
               <div key={worker.id} className="p-4 space-y-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
                 <div className="font-bold text-lg text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-700 pb-2">
@@ -268,13 +268,13 @@ export default function DailyEntry() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">الخصم (د.ع)</label>
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">التأخير (دقيقة)</label>
                     <input
                       type="number"
                       min="0"
                       placeholder="0"
-                      value={entry.discount}
-                      onChange={(e) => handleEntryChange(worker.id, 'discount', e.target.value)}
+                      value={entry.delayMinutes}
+                      onChange={(e) => handleEntryChange(worker.id, 'delayMinutes', e.target.value)}
                       className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white transition-colors text-sm"
                     />
                   </div>

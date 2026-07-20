@@ -107,7 +107,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               if (rec.attendance === 'نصف') attendance = 'half';
               if (rec.attendance === 'غياب') attendance = 'absent';
               
-              const discount = rec.overtime < 0 ? Math.abs(rec.overtime) : 0;
+              const delayMinutes = rec.overtime < 0 ? Math.abs(rec.overtime) : 0;
               const advancePayment = Number(rec.advance) || 0;
               const allowance = Number(rec.departure) || 0;
               
@@ -129,7 +129,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
                 attendance,
                 allowance,
                 advancePayment,
-                discount,
+                delayMinutes,
                 note: rec.note || ''
               };
             });
