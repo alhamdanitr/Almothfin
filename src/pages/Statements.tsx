@@ -202,50 +202,25 @@ export default function Statements() {
               style={index > 0 ? { pageBreakBefore: 'always', breakBefore: 'page' } : {}}
             >
               {/* Print Header - Only visible when printing/exporting */}
-              <div className="hidden print:flex flex-col items-center justify-center border-b-2 border-gray-800 pb-6 mb-6">
-                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">معمل هاشم الاحمدي للتطريز الالكتروني</h1>
-                <div className="w-24 h-1 bg-gray-800 my-4 rounded-full"></div>
-                <h2 className="text-xl font-bold text-gray-800 bg-gray-100 px-6 py-2 rounded-full border border-gray-200">
+              <div className="hidden print:flex flex-col items-center justify-center border-b-2 border-gray-800 pb-6 mb-6 print:pb-2 print:mb-2">
+                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight print:text-xl">معمل هاشم الاحمدي للتطريز الالكتروني</h1>
+                <div className="w-24 h-1 bg-gray-800 my-4 print:my-2 rounded-full"></div>
+                <h2 className="text-xl font-bold text-gray-800 bg-gray-100 px-6 py-2 rounded-full border border-gray-200 print:text-sm print:px-4 print:py-1">
                   كشف حساب العامل: <span className="text-indigo-700">{worker?.name}</span>
                 </h2>
-                <div className="flex items-center gap-4 mt-4 text-gray-600 font-medium">
-                  <span className="bg-gray-50 px-4 py-1 rounded-md border border-gray-200">عن شهر: <span className="font-bold text-gray-900">{statementData.month}</span></span>
-                  <span className="bg-gray-50 px-4 py-1 rounded-md border border-gray-200">تاريخ الإصدار: <span className="font-bold text-gray-900">{new Date().toLocaleDateString('ar-IQ')}</span></span>
-                </div>
-              </div>
-
-              {/* Summary Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 print:grid-cols-5 print:gap-4 print:mb-8">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border-gray-200 print:bg-gray-50">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:font-semibold">الراتب المستحق</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white mt-1 print:text-gray-900">{(statementData.summary.totalEarned || 0).toLocaleString()} د.ع</p>
-                  <p className="text-xs text-gray-400 mt-2 print:text-gray-500">({statementData.summary.daysPresent + (statementData.summary.daysHalf * 0.5)} يوم)</p>
-                </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border-gray-200 print:bg-gray-50">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:font-semibold">إجمالي الصرفيات</p>
-                  <p className="text-xl font-bold text-red-500 mt-1 print:text-red-700">{(statementData.summary.totalAllowance || 0).toLocaleString()} د.ع</p>
-                </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border-gray-200 print:bg-gray-50">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:font-semibold">إجمالي السحبيات</p>
-                  <p className="text-xl font-bold text-red-500 mt-1 print:text-red-700">{(statementData.summary.totalAdvances || 0).toLocaleString()} د.ع</p>
-                </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border-gray-200 print:bg-gray-50">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:font-semibold">إجمالي الخصومات</p>
-                  <p className="text-xl font-bold text-red-500 mt-1 print:text-red-700">{(statementData.summary.totalDiscounts || 0).toLocaleString()} د.ع</p>
-                </div>
-                <div className="bg-indigo-600 rounded-2xl p-4 lg:p-5 shadow-sm text-white print:bg-gray-800 print:text-white print:border-none print:shadow-md col-span-2 lg:col-span-1 flex flex-col justify-center">
-                  <p className="text-indigo-100 text-sm print:text-gray-200 font-medium">الصافي المتبقي</p>
-                  <p className="text-2xl font-bold mt-1 print:text-white">{(statementData.summary.netSalary || 0).toLocaleString()} د.ع</p>
+                <div className="flex items-center gap-4 mt-4 print:mt-2 text-gray-600 font-medium print:text-xs">
+                  <span className="bg-gray-50 px-4 py-1 rounded-md border border-gray-200 print:px-2">عن شهر: <span className="font-bold text-gray-900">{statementData.month}</span></span>
+                  <span className="bg-gray-50 px-4 py-1 rounded-md border border-gray-200 print:px-2">تاريخ الإصدار: <span className="font-bold text-gray-900">{new Date().toLocaleDateString('ar-IQ')}</span></span>
                 </div>
               </div>
 
               {/* Details Table */}
-              <div className="bg-white dark:bg-slate-800 shadow-sm rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border-gray-300 print:rounded-lg">
-                <div className="px-4 py-3 print:px-2 print:py-2 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/20 print:bg-gray-100 print:border-gray-300 flex justify-between items-center">
-                  <h3 className="font-semibold text-gray-900 dark:text-white print:text-gray-900">تفاصيل الحركات اليومية ({statementData.month})</h3>
+              <div className="bg-white dark:bg-slate-800 shadow-sm rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border-gray-300 print:rounded-lg print:mb-2">
+                <div className="px-4 py-3 print:px-1 print:py-0.5 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/20 print:bg-gray-100 print:border-gray-300 flex justify-between items-center">
+                  <h3 className="font-semibold text-gray-900 dark:text-white print:text-gray-900 print:text-[11px]">تفاصيل الحركات اليومية ({statementData.month})</h3>
                 </div>
                 {statementData.records.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500 dark:text-gray-400 print:text-gray-600">
+                  <div className="p-8 text-center text-gray-500 dark:text-gray-400 print:text-gray-600 print:text-sm">
                     لا توجد سجلات لهذا العامل في الشهر المحدد.
                   </div>
                 ) : (
@@ -254,14 +229,14 @@ export default function Statements() {
                       <table className="min-w-full text-right divide-y divide-gray-200 dark:divide-slate-700 print:divide-gray-300">
                         <thead className="bg-gray-50 dark:bg-slate-900/50 print:bg-gray-200">
                           <tr>
-                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">التاريخ</th>
-                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">اليوم</th>
-                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الحضور</th>
-                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الصرفة</th>
-                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">السحبيات</th>
-                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">التأخير (دقيقة)</th>
-                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">ملاحظات</th>
-                            <th className="px-4 py-3 print:px-2 print:py-2 text-sm font-bold text-gray-900 dark:text-gray-300 print:hidden">إجراءات</th>
+                            <th className="px-4 py-3 print:px-1 print:py-0.5 text-sm print:text-[10px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">التاريخ</th>
+                            <th className="px-4 py-3 print:px-1 print:py-0.5 text-sm print:text-[10px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">اليوم</th>
+                            <th className="px-4 py-3 print:px-1 print:py-0.5 text-sm print:text-[10px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الحضور</th>
+                            <th className="px-4 py-3 print:px-1 print:py-0.5 text-sm print:text-[10px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الصرفة</th>
+                            <th className="px-4 py-3 print:px-1 print:py-0.5 text-sm print:text-[10px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">السحبيات</th>
+                            <th className="px-4 py-3 print:px-1 print:py-0.5 text-sm print:text-[10px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">التأخير (دقيقة)</th>
+                            <th className="px-4 py-3 print:px-1 print:py-0.5 text-sm print:text-[10px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">ملاحظات</th>
+                            <th className="px-4 py-3 print:px-1 print:py-0.5 text-sm print:text-[10px] font-bold text-gray-900 dark:text-gray-300 print:hidden">إجراءات</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-slate-700 print:divide-gray-200">
@@ -269,33 +244,33 @@ export default function Statements() {
                             const dateObj = parseISO(r.date);
                             return (
                               <tr key={r.id} className={`hover:bg-gray-50 dark:hover:bg-slate-700/50 print:hover:bg-transparent ${i % 2 === 0 ? 'print:bg-white' : 'print:bg-gray-50'}`}>
-                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white print:text-gray-900">
+                                <td className="px-4 py-3 print:px-1 print:py-0.5 whitespace-nowrap text-sm print:text-[10px] font-medium text-gray-900 dark:text-white print:text-gray-900">
                                   {r.date}
                                 </td>
-                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 print:text-gray-700">
+                                <td className="px-4 py-3 print:px-1 print:py-0.5 whitespace-nowrap text-sm print:text-[10px] text-gray-600 dark:text-gray-400 print:text-gray-700">
                                   {format(dateObj, 'EEEE', { locale: ar })}
                                 </td>
-                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap">
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold
+                                <td className="px-4 py-3 print:px-1 print:py-0.5 whitespace-nowrap">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs print:text-[9px] print:px-1 print:py-0 font-bold
                                     ${r.attendance === 'full' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 print:bg-emerald-100 print:text-emerald-800 border print:border-emerald-200' : 
                                       r.attendance === 'half' ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 print:bg-amber-100 print:text-amber-800 border print:border-amber-200' : 
                                       'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300 print:bg-red-100 print:text-red-800 border print:border-red-200'}`}>
                                     {r.attendance === 'full' ? 'حاضر' : r.attendance === 'half' ? 'نصف يوم' : 'غائب'}
                                   </span>
                                 </td>
-                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm font-medium print:text-gray-900">
+                                <td className="px-4 py-3 print:px-1 print:py-0.5 whitespace-nowrap text-sm print:text-[10px] font-medium print:text-gray-900">
                                   {r.allowance && r.allowance > 0 ? <span className="text-red-500 print:text-red-700">{(r.allowance || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm font-medium print:text-gray-900">
+                                <td className="px-4 py-3 print:px-1 print:py-0.5 whitespace-nowrap text-sm print:text-[10px] font-medium print:text-gray-900">
                                   {r.advancePayment > 0 ? <span className="text-red-500 print:text-red-700">{(r.advancePayment || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm font-medium print:text-gray-900">
+                                <td className="px-4 py-3 print:px-1 print:py-0.5 whitespace-nowrap text-sm print:text-[10px] font-medium print:text-gray-900">
                                   {r.delayMinutes > 0 ? <span className="text-red-500 print:text-red-700">{(r.delayMinutes || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:whitespace-normal break-words">
+                                <td className="px-4 py-3 print:px-1 print:py-0.5 whitespace-nowrap text-sm print:text-[10px] text-gray-500 dark:text-gray-400 print:text-gray-600 print:whitespace-normal break-words max-w-[120px] truncate print:max-w-none print:truncate-none">
                                   {r.note || <span className="text-gray-300 print:text-gray-200">-</span>}
                                 </td>
-                                <td className="px-4 py-3 print:px-2 print:py-2 whitespace-nowrap text-sm print:hidden">
+                                <td className="px-4 py-3 print:px-1 print:py-0.5 whitespace-nowrap text-sm print:hidden">
                                   <button onClick={() => openEditModal(r)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors">
                                     <Edit2 className="w-4 h-4" />
                                   </button>
@@ -361,6 +336,31 @@ export default function Statements() {
                     </div>
                   </>
                 )}
+              </div>
+
+              {/* Summary Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 print:grid-cols-5 print:gap-1 mt-6 print:mt-2">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border print:border-gray-300 print:bg-white print:p-1.5 print:rounded-lg">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:text-[10px] print:font-semibold">الراتب المستحق</p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-white mt-1 print:text-gray-900 print:text-[13px]">{(statementData.summary.totalEarned || 0).toLocaleString()} د.ع</p>
+                  <p className="text-xs text-gray-400 mt-1 print:text-gray-500 print:text-[9px]">({statementData.summary.daysPresent + (statementData.summary.daysHalf * 0.5)} يوم)</p>
+                </div>
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border print:border-gray-300 print:bg-white print:p-1.5 print:rounded-lg">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:text-[10px] print:font-semibold">إجمالي الصرفيات</p>
+                  <p className="text-xl font-bold text-red-500 mt-1 print:text-red-700 print:text-[13px]">{(statementData.summary.totalAllowance || 0).toLocaleString()} د.ع</p>
+                </div>
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border print:border-gray-300 print:bg-white print:p-1.5 print:rounded-lg">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:text-[10px] print:font-semibold">إجمالي السحبيات</p>
+                  <p className="text-xl font-bold text-red-500 mt-1 print:text-red-700 print:text-[13px]">{(statementData.summary.totalAdvances || 0).toLocaleString()} د.ع</p>
+                </div>
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border print:border-gray-300 print:bg-white print:p-1.5 print:rounded-lg">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:text-[10px] print:font-semibold">إجمالي الخصومات</p>
+                  <p className="text-xl font-bold text-red-500 mt-1 print:text-red-700 print:text-[13px]">{(statementData.summary.totalDiscounts || 0).toLocaleString()} د.ع</p>
+                </div>
+                <div className="bg-indigo-600 rounded-2xl p-4 lg:p-5 shadow-sm text-white print:bg-gray-800 print:text-white print:border-none print:shadow-sm col-span-2 lg:col-span-1 flex flex-col justify-center print:col-span-1 print:p-1.5 print:rounded-lg">
+                  <p className="text-indigo-100 text-sm print:text-gray-200 print:text-[10px] font-medium">الصافي المتبقي</p>
+                  <p className="text-2xl font-bold mt-1 print:text-white print:text-[15px]">{(statementData.summary.netSalary || 0).toLocaleString()} د.ع</p>
+                </div>
               </div>
             </div>
           ))}

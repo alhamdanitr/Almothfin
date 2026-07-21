@@ -4,3 +4,10 @@
   --font-cairo: "Cairo", ui-sans-serif, system-ui, sans-serif;
 }
 
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+}
+
