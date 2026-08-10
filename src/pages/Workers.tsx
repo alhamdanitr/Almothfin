@@ -133,10 +133,10 @@ export default function Workers() {
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                        {(worker.monthlySalary || 0).toLocaleString()} د.ع
+                        {(worker.monthlySalary || 0).toLocaleString()} ر.ي
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                        {(worker.dailyAllowance || 0).toLocaleString()} د.ع
+                        {(worker.dailyAllowance || 0).toLocaleString()} ر.ي
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                         {worker.joinDate}
@@ -204,11 +204,11 @@ export default function Workers() {
                   <div className="grid grid-cols-2 gap-y-2 text-sm">
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">الراتب الشهري</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{(worker.monthlySalary || 0).toLocaleString()} د.ع</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{(worker.monthlySalary || 0).toLocaleString()} ر.ي</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">الصرفة اليومية</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{(worker.dailyAllowance || 0).toLocaleString()} د.ع</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{(worker.dailyAllowance || 0).toLocaleString()} ر.ي</p>
                     </div>
                     <div className="col-span-2">
                       <p className="text-xs text-gray-500 dark:text-gray-400">تاريخ الدخول</p>
@@ -261,7 +261,7 @@ export default function Workers() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الراتب الشهري (د.ع)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الراتب الشهري (ر.ي)</label>
                 <input
                   type="number"
                   required
@@ -274,7 +274,7 @@ export default function Workers() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الصرفة اليومية الثابتة (د.ع)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الصرفة اليومية الثابتة (ر.ي)</label>
                 <input
                   type="number"
                   min="0"

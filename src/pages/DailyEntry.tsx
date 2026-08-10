@@ -200,8 +200,8 @@ export default function DailyEntry() {
               <tr>
                 <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">اسم العامل</th>
                 <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">الحضور</th>
-                <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">الصرفة (د.ع)</th>
-                <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">السحبيات (د.ع)</th>
+                <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">الصرفة (ر.ي)</th>
+                <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">السحبيات (ر.ي)</th>
                 <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[15%]">التأخير (دقيقة)</th>
                 <th scope="col" className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-300 w-[25%]">ملاحظات</th>
               </tr>
@@ -303,7 +303,7 @@ export default function DailyEntry() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">الصرفة (د.ع)</label>
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">الصرفة (ر.ي)</label>
                     <input
                       type="number"
                       min="0"
@@ -314,7 +314,7 @@ export default function DailyEntry() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">السحبيات (د.ع)</label>
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">السحبيات (ر.ي)</label>
                     <input
                       type="number"
                       min="0"

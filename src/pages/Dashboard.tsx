@@ -97,8 +97,8 @@ export default function Dashboard() {
   const statCards = [
     { title: 'إجمالي العمال', value: stats.totalWorkers, icon: Users, color: 'bg-blue-500' },
     { title: 'الحاضرين اليوم', value: stats.presentToday, icon: UserCheck, color: 'bg-emerald-500' },
-    { title: 'سحبيات الشهر', value: `${(stats.totalAdvancesMonth || 0).toLocaleString()} د.ع`, icon: CreditCard, color: 'bg-amber-500' },
-    { title: 'الرواتب المتبقية', value: `${Math.round(stats.remainingSalariesMonth || 0).toLocaleString()} د.ع`, icon: Wallet, color: 'bg-indigo-500' },
+    { title: 'سحبيات الشهر', value: `${(stats.totalAdvancesMonth || 0).toLocaleString()} ر.ي`, icon: CreditCard, color: 'bg-amber-500' },
+    { title: 'الرواتب المتبقية', value: `${Math.round(stats.remainingSalariesMonth || 0).toLocaleString()} ر.ي`, icon: Wallet, color: 'bg-indigo-500' },
   ];
 
   return (
@@ -308,7 +308,7 @@ export default function Dashboard() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">الصرفة (د.ع)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">الصرفة (ر.ي)</label>
                   <input 
                     type="number"
                     min="0"
@@ -318,7 +318,7 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">السحبيات (د.ع)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">السحبيات (ر.ي)</label>
                   <input 
                     type="number"
                     min="0"
