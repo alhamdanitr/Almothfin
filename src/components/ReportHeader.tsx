@@ -26,6 +26,8 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({ title, dynamicData }
             src={companyProfile.logo} 
             alt="شعار المنشأة" 
             className="h-24 w-auto object-contain mix-blend-multiply"
+            loading="lazy"
+            decoding="async"
           />
         </div>
       </div>
