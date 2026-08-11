@@ -203,7 +203,8 @@ export default function Statements() {
             >
               {/* Print Header - Only visible when printing/exporting */}
               <div className="hidden print:flex flex-col items-center justify-center border-b-2 border-gray-800 pb-6 mb-6 print:pb-1 print:mb-1">
-                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight print:text-lg">معمل هاشم الاحمدي للتطريز الالكتروني</h1>
+                <img src="/logo.png" alt="شعار المعمل" className="h-20 mb-2 object-contain print:h-14" />
+                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight print:text-lg mt-1">معمل هاشم الاحمدي للتطريز الالكتروني</h1>
                 <div className="w-24 h-1 bg-gray-800 my-4 print:my-1 rounded-full"></div>
                 <h2 className="text-xl font-bold text-gray-800 bg-gray-100 px-6 py-2 rounded-full border border-gray-200 print:text-xs print:px-2 print:py-0.5">
                   كشف حساب العامل: <span className="text-indigo-700">{worker?.name}</span>
