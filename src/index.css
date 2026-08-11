@@ -7,7 +7,7 @@
 @media print {
   @page {
     size: A4;
-    margin: 5mm 7mm !important;
+    margin: 8mm 8mm !important; /* هوامش متوازنة وطبيعية */
   }
 
   body {
@@ -17,88 +17,84 @@
     background: white !important;
     margin: 0 !important;
     padding: 0 !important;
-    width: 210mm;
-    height: 297mm;
+    color: #000 !important;
   }
 
-  /* الحاوية الرئيسية لكل شهر - يجب أن تأخذ صفحة كاملة */
+  /* الحاوية الرئيسية للمحتوى */
   .print-month-container {
-    page-break-after: always !important;
-    break-after: page !important;
-    height: 287mm !important; /* طول الورقة ناقص الهوامش */
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
+    display: block !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
   }
 
-  /* منع ظهور صفحات فارغة في النهاية */
-  .print-month-container:last-child {
-    page-break-after: auto !important;
-    break-after: auto !important;
+  /* منع ظهور صفحات فارغة */
+  .print-month-container + .print-month-container {
+    page-break-before: always !important;
+    break-before: page !important;
   }
 
-  /* تنسيق الجدول ليمتد ويملأ المساحة */
+  /* الجدول: العودة للعرض الطبيعي والواضح */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
-    flex-grow: 1 !important; /* جعل الجدول يمتد لملء الفراغ */
-    table-layout: fixed !important;
+    margin-top: 5px !important;
+    table-layout: auto !important; /* العودة للوضع التلقائي لمنع "العجن" */
   }
 
   th {
-    background-color: #f1f5f9 !important;
-    border: 1px solid #000 !important;
-    font-size: 9pt !important;
+    background-color: #f8fafc !important;
+    border: 1.5px solid #000 !important;
+    font-size: 10pt !important;
     font-weight: 900 !important;
-    padding: 4px 2px !important;
+    padding: 6px 4px !important;
   }
 
   td {
     border: 1px solid #cbd5e1 !important;
-    font-size: 9pt !important;
+    font-size: 10pt !important;
     font-weight: 700 !important;
-    padding: 0px 4px !important;
-    height: 6.2mm !important; /* ارتفاع دقيق يسمح بـ 31 يوماً في صفحة واحدة */
-    line-height: 1 !important;
+    padding: 5px 4px !important; /* مسافة طبيعية ومريحة */
     vertical-align: middle !important;
   }
 
-  /* كروت الملخص في الأسفل */
+  /* كروت الملخص: تنسيق مدمج لضمان الصفحة الواحدة */
   .print-summary-grid {
     display: grid !important;
     grid-template-columns: repeat(5, 1fr) !important;
-    gap: 5px !important;
-    margin-top: 5mm !important;
-    padding-bottom: 2mm !important;
+    gap: 6px !important;
+    margin-top: 10px !important;
+    page-break-inside: avoid !important;
   }
 
   .print-summary-card {
-    border: 1.5px solid #000 !important;
-    border-radius: 6px !important;
-    padding: 5px !important;
+    border: 2px solid #000 !important;
+    border-radius: 8px !important;
+    padding: 6px 4px !important;
     text-align: center !important;
     background: white !important;
   }
 
   .print-summary-card p {
     margin: 0 !important;
-    font-weight: 900 !important;
+    font-weight: 800 !important;
     font-size: 9pt !important;
   }
 
   .print-summary-card .value {
     font-size: 11pt !important;
+    font-weight: 900 !important;
     margin-top: 2px !important;
   }
 
-  /* إخفاء أي عناصر غير ضرورية */
-  .no-print, header, nav, footer, .print\:hidden {
+  /* إخفاء العناصر غير الضرورية */
+  .no-print, header, nav, footer, .print\:hidden, .print\:hidden * {
     display: none !important;
   }
 
-  /* منع انقسام أي عنصر داخلي */
-  tr, td, th, .print-summary-card {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
+  /* تقليل المسافات البينية بشكل عام */
+  .space-y-6 > * + * {
+    margin-top: 0.8rem !important;
   }
 }
