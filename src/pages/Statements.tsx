@@ -4,6 +4,7 @@ import { User, Calendar as CalendarIcon, Printer, Edit2, X, Check } from 'lucide
 import { format, parseISO } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { DailyRecord, AttendanceStatus } from '../types';
+import { ReportHeader } from '../components/ReportHeader';
 
 export default function Statements() {
   const { workers, records, updateRecord } = useStore();
@@ -201,19 +202,15 @@ export default function Statements() {
               className={`space-y-6 print:block print:p-0 ${index > 0 ? 'mt-12 print:mt-0 border-t-4 border-dashed border-gray-200 print:border-none pt-12 print:pt-0' : ''}`}
               style={index > 0 ? { pageBreakBefore: 'always', breakBefore: 'page' } : {}}
             >
-              {/* Print Header - Only visible when printing/exporting */}
-              <div className="hidden print:flex flex-col items-center justify-center border-b-2 border-gray-800 pb-6 mb-6 print:pb-1 print:mb-1">
-                <img src="/logo.png" alt="شعار المعمل" className="h-20 mb-2 object-contain print:h-14" />
-                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight print:text-lg mt-1">معمل هاشم الاحمدي للتطريز الالكتروني</h1>
-                <div className="w-24 h-1 bg-gray-800 my-4 print:my-1 rounded-full"></div>
-                <h2 className="text-xl font-bold text-gray-800 bg-gray-100 px-6 py-2 rounded-full border border-gray-200 print:text-xs print:px-2 print:py-0.5">
-                  كشف حساب العامل: <span className="text-indigo-700">{worker?.name}</span>
-                </h2>
-                <div className="flex items-center gap-4 mt-4 print:mt-1 text-gray-600 font-medium print:text-[10px]">
-                  <span className="bg-gray-50 px-4 py-1 rounded-md border border-gray-200 print:px-2 print:py-0">عن شهر: <span className="font-bold text-gray-900">{statementData.month}</span></span>
-                  <span className="bg-gray-50 px-4 py-1 rounded-md border border-gray-200 print:px-2 print:py-0">تاريخ الإصدار: <span className="font-bold text-gray-900">{new Date().toLocaleDateString('ar-IQ')}</span></span>
-                </div>
-              </div>
+              {/* Print Header - Unified Report Header */}
+              <ReportHeader 
+                title="كشف حساب العامل"
+                dynamicData={[
+                  { label: "اسم العامل", value: worker?.name || "غير معروف" },
+                  { label: "عن شهر", value: statementData.month },
+                  { label: "تاريخ الإصدار", value: new Date().toLocaleDateString('ar-IQ') }
+                ]}
+              />
 
               {/* Details Table */}
               <div className="bg-white dark:bg-slate-800 shadow-sm rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border-gray-300 print:rounded-lg print:mb-1 print:border-none">
