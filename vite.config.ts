@@ -11,7 +11,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png'],
+        includeAssets: ['icon-192.png', 'icon-512.png'],
         manifest: {
           name: 'معمل هاشم الأحمدي للتطريز',
           short_name: 'هاشم الأحمدي',
