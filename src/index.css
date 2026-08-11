@@ -7,12 +7,12 @@
 @media print {
   @page {
     size: A4;
-    margin: 6mm 6mm !important;
+    margin: 8mm !important; /* هوامش متوازنة تمنع أي دفع للمحتوى خارج الورقة */
   }
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    font-family: 'Cairo', sans-serif !important; /* التأكد من استخدام خط كايرو */
+    font-family: 'Cairo', sans-serif !important;
     font-size: 11pt;
     line-height: 1.3;
     margin: 0 !important;
@@ -24,51 +24,49 @@
     print-color-adjust: exact;
     display: block !important;
   }
-  /* الحفاظ على التقرير في صفحة واحدة دون المساس بحجم الخط */
-  [ref="printRef"], .print\:block {
+  /* منع أي انقسام للصفحة تماماً لأي قسم في التقرير */
+  div[key], .print\:block, table, .grid {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    display: block !important;
+    page-break-before: auto !important;
+    page-break-after: auto !important;
   }
   table {
-    page-break-inside: avoid !important;
     width: 100% !important;
     border-collapse: collapse;
-    margin-bottom: 10px !important;
+    margin-bottom: 15px !important;
   }
   th {
-    padding: 6px 4px !important;
+    padding: 8px 4px !important;
     border-bottom: 2px solid #000 !important;
     font-size: 10pt !important;
-    font-weight: 800 !important; /* خط عريض جداً للعناوين */
+    font-weight: 800 !important;
     background-color: #f8fafc !important;
   }
   td {
-    padding: 5px 4px !important;
+    padding: 6px 4px !important;
     border-bottom: 1px solid #cbd5e1 !important;
     font-size: 10pt !important;
-    font-weight: 600 !important; /* خط واضح ومتوسط السماكة للبيانات */
+    font-weight: 600 !important;
   }
-  /* كروت الملخص: استعادة الحجم الاحترافي مع ضغط المسافات فقط */
+  /* تنسيق كروت الملخص لضمان بقائها في نفس الصفحة */
   .grid.print\:grid-cols-5 {
-    gap: 6px !important;
-    margin-top: 12px !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 8px !important;
+    margin-top: 15px !important;
     page-break-inside: avoid !important;
   }
   .grid.print\:grid-cols-5 > div {
-    padding: 6px !important;
-    border: 1.5px solid #000 !important;
+    padding: 8px !important;
+    border: 2px solid #000 !important;
     border-radius: 8px !important;
   }
-  .grid.print\:grid-cols-5 p.font-bold {
-    font-size: 11pt !important;
-    font-weight: 800 !important;
-  }
-  /* تقليل الفراغات البينية لضمان الصفحة الواحدة */
+  /* تقليل المسافات البينية بشكل مدروس */
   .space-y-6 > * + * {
-    margin-top: 0.6rem !important;
+    margin-top: 1rem !important;
   }
-  header, footer, nav, .no-print {
+  header, footer, nav, .no-print, .print\:hidden {
     display: none !important;
   }
 }

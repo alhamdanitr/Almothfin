@@ -200,7 +200,7 @@ export default function Statements() {
             <div 
               key={statementData.month} 
               className={`space-y-6 print:block print:p-0 ${index > 0 ? 'mt-12 print:mt-0 border-t-4 border-dashed border-gray-200 print:border-none pt-12 print:pt-0' : ''}`}
-              style={index > 0 ? { pageBreakBefore: 'always', breakBefore: 'page' } : {}}
+              style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}
             >
               {/* Print Header - Unified Report Header */}
               <ReportHeader 
