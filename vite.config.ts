@@ -11,7 +11,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['icon-192.png', 'icon-512.png'],
+        includeAssets: ['icon-192.png', 'icon-512.png', 'screenshot-desktop.png', 'screenshot-mobile.png'],
         manifest: {
           name: 'معمل هاشم الأحمدي للتطريز',
           short_name: 'هاشم الأحمدي',
@@ -19,6 +19,12 @@ export default defineConfig(() => {
           theme_color: '#4f46e5',
           background_color: '#ffffff',
           display: 'standalone',
+          start_url: '/',
+          id: '/',
+          dir: 'rtl',
+          lang: 'ar',
+          orientation: 'portrait-primary',
+          categories: ['business', 'productivity', 'finance'],
           icons: [
             {
               src: '/icon-192.png',
@@ -35,6 +41,29 @@ export default defineConfig(() => {
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any maskable'
+            }
+          ],
+          screenshots: [
+            {
+              src: '/screenshot-desktop.png',
+              sizes: '1920x1080',
+              type: 'image/png',
+              form_factor: 'wide'
+            },
+            {
+              src: '/screenshot-mobile.png',
+              sizes: '1080x1920',
+              type: 'image/png',
+              form_factor: 'narrow'
+            }
+          ],
+          shortcuts: [
+            {
+              name: 'لوحة التحكم',
+              short_name: 'الرئيسية',
+              description: 'العودة إلى لوحة التحكم',
+              url: '/',
+              icons: [{ src: '/icon-192.png', sizes: '192x192' }]
             }
           ]
         }

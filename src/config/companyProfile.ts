@@ -1,4 +1,4 @@
-import logoBase64 from '../assets/logo.png?inline';
+import { logoBase64 } from './logoBase64';
 
 export const companyProfile = {
   name: "مشغل هاشم الاحمدي للتصميم والتطريز الالكتروني",
