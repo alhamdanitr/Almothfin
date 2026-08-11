@@ -242,30 +242,30 @@ export default function Statements() {
                             const dateObj = parseISO(r.date);
                             return (
                               <tr key={r.id} className={`hover:bg-gray-50 dark:hover:bg-slate-700/50 print:hover:bg-transparent ${i % 2 === 0 ? 'print:bg-white' : 'print:bg-gray-50/50'}`}>
-                                <td className="px-4 py-3 print:px-0.5 print:py-0 whitespace-nowrap text-sm print:text-[8px] font-medium text-gray-900 dark:text-white print:text-gray-900">
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-bold text-gray-900 dark:text-white print:text-gray-900">
                                   {r.date}
                                 </td>
-                                <td className="px-4 py-3 print:px-0.5 print:py-0 whitespace-nowrap text-sm print:text-[8px] text-gray-600 dark:text-gray-400 print:text-gray-700">
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] text-gray-600 dark:text-gray-400 print:text-gray-800">
                                   {format(dateObj, 'EEEE', { locale: ar })}
                                 </td>
-                                <td className="px-4 py-3 print:px-0.5 print:py-0 whitespace-nowrap">
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs print:text-[7px] print:px-0.5 print:py-0 font-bold
-                                    ${r.attendance === 'full' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 print:bg-transparent print:text-emerald-700' : 
-                                      r.attendance === 'half' ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 print:bg-transparent print:text-amber-700' : 
-                                      'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300 print:bg-transparent print:text-red-700'}`}>
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs print:text-[9.5px] print:px-1.5 print:py-0 font-black
+                                    ${r.attendance === 'full' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 print:bg-transparent print:text-emerald-800' : 
+                                      r.attendance === 'half' ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 print:bg-transparent print:text-amber-800' : 
+                                      'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300 print:bg-transparent print:text-red-800'}`}>
                                     {r.attendance === 'full' ? 'حاضر' : r.attendance === 'half' ? 'نصف يوم' : 'غائب'}
                                   </span>
                                 </td>
-                                <td className="px-4 py-3 print:px-0.5 print:py-0 whitespace-nowrap text-sm print:text-[8px] font-bold print:text-gray-900">
-                                  {r.allowance && r.allowance > 0 ? <span className="text-red-500 print:text-red-700">{(r.allowance || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-gray-900">
+                                  {r.allowance && r.allowance > 0 ? <span className="text-red-600 print:text-red-800">{(r.allowance || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-4 py-3 print:px-0.5 print:py-0 whitespace-nowrap text-sm print:text-[8px] font-bold print:text-gray-900">
-                                  {r.advancePayment > 0 ? <span className="text-red-500 print:text-red-700">{(r.advancePayment || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-gray-900">
+                                  {r.advancePayment > 0 ? <span className="text-red-600 print:text-red-800">{(r.advancePayment || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-4 py-3 print:px-0.5 print:py-0 whitespace-nowrap text-sm print:text-[8px] font-bold print:text-gray-900">
-                                  {r.delayMinutes > 0 ? <span className="text-red-500 print:text-red-700">{(r.delayMinutes || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-gray-900">
+                                  {r.delayMinutes > 0 ? <span className="text-red-600 print:text-red-800">{(r.delayMinutes || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-4 py-3 print:px-0.5 print:py-0 whitespace-nowrap text-sm print:text-[8px] text-gray-500 dark:text-gray-400 print:text-gray-600 print:whitespace-normal break-words max-w-[120px] truncate print:max-w-none print:truncate-none">
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10px] text-gray-500 dark:text-gray-400 print:text-gray-800 print:whitespace-normal break-words max-w-[120px] truncate print:max-w-none print:truncate-none">
                                   {r.note || <span className="text-gray-300 print:text-gray-200">-</span>}
                                 </td>
                                 <td className="px-4 py-3 print:px-0.5 print:py-0 whitespace-nowrap text-sm print:hidden">
@@ -278,11 +278,11 @@ export default function Statements() {
                           })}
                           {/* Totals Row for Print */}
                           <tr className="hidden print:table-row bg-gray-100 font-black border-t-2 border-gray-900">
-                            <td colSpan={3} className="px-4 py-1 text-center text-[9px] text-gray-900">إجماليات الشهر</td>
-                            <td className="px-0.5 py-1 text-[9px] text-red-800">{(statementData.records.reduce((acc, r) => acc + (r.allowance || 0), 0)).toLocaleString()}</td>
-                            <td className="px-0.5 py-1 text-[9px] text-red-800">{(statementData.records.reduce((acc, r) => acc + (r.advancePayment || 0), 0)).toLocaleString()}</td>
-                            <td className="px-0.5 py-1 text-[9px] text-red-800">{(statementData.records.reduce((acc, r) => acc + (r.delayMinutes || 0), 0)).toLocaleString()}</td>
-                            <td className="px-0.5 py-1 text-[9px]">-</td>
+                            <td colSpan={3} className="px-4 py-2 text-center text-[11px] text-gray-900">إجماليات الشهر</td>
+                            <td className="px-1 py-2 text-[11px] text-red-900">{(statementData.records.reduce((acc, r) => acc + (r.allowance || 0), 0)).toLocaleString()}</td>
+                            <td className="px-1 py-2 text-[11px] text-red-900">{(statementData.records.reduce((acc, r) => acc + (r.advancePayment || 0), 0)).toLocaleString()}</td>
+                            <td className="px-1 py-2 text-[11px] text-red-900">{(statementData.records.reduce((acc, r) => acc + (r.delayMinutes || 0), 0)).toLocaleString()}</td>
+                            <td className="px-1 py-2 text-[11px]">-</td>
                           </tr>
                         </tbody>
                       </table>

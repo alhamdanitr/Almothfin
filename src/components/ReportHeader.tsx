@@ -24,12 +24,12 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({ title, dynamicData }
           </div>
         </div>
         
-        {/* Left Side: Larger & Prominent Logo */}
+        {/* Left Side: Larger & Prominent Logo - Slightly Increased Size */}
         <div className="flex-shrink-0 ml-4 print:block">
           <img 
             src={companyProfile.logo} 
             alt="شعار المنشأة" 
-            className="h-32 w-32 object-contain print:block print:max-h-32 print:max-w-32 drop-shadow-sm"
+            className="h-40 w-40 object-contain print:block print:max-h-40 print:max-w-40 drop-shadow-sm"
             style={{ display: 'block', visibility: 'visible', printColorAdjust: 'exact' }}
           />
         </div>

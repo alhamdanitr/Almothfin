@@ -7,13 +7,13 @@
 @media print {
   @page {
     size: A4;
-    margin: 2mm; /* تقليل الهوامش لأقصى حد */
+    margin: 10mm 8mm; /* هوامش متوازنة ومريحة للعين */
   }
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    font-size: 10pt;
-    line-height: 1.1;
+    font-size: 11pt; /* خط أوضح وأكبر */
+    line-height: 1.4;
   }
   img {
     -webkit-print-color-adjust: exact;
@@ -21,18 +21,29 @@
     display: block !important;
     visibility: visible !important;
   }
-  /* إجبار الجدول على عدم الانقسام وتصغير المسافات */
+  /* إجبار الجدول على ملء الصفحة بشكل متناسق */
   table {
     page-break-inside: avoid;
     width: 100% !important;
+    border-collapse: collapse;
   }
-  th, td {
-    padding-top: 1px !important;
-    padding-bottom: 1px !important;
+  th {
+    padding: 8px 4px !important;
+    background-color: #f8fafc !important;
+    border-bottom: 2px solid #000 !important;
   }
-  /* منع أي فراغات زائدة بين العناصر في الطباعة */
+  td {
+    padding: 6px 4px !important; /* مسافات داخلية تجعل الجدول يملأ الورقة */
+    border-bottom: 1px solid #e2e8f0 !important;
+  }
+  /* تحسين توزيع المساحات بين الأقسام */
   .space-y-6 > * + * {
-    margin-top: 0.25rem !important;
+    margin-top: 1.5rem !important;
+  }
+  /* منع انقسام كروت الملخص عن الجدول */
+  .print\:block {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }
 
