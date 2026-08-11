@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { companyProfile } from '../config/companyProfile';
 
 export interface ReportHeaderProps {
@@ -7,6 +7,37 @@ export interface ReportHeaderProps {
 }
 
 export const ReportHeader: React.FC<ReportHeaderProps> = ({ title, dynamicData }) => {
+  const [logoSrc, setLogoSrc] = useState<string>(companyProfile.logo);
+
+  useEffect(() => {
+    let isMounted = true;
+    const convertLogoToBase64 = async () => {
+      try {
+        const url = companyProfile.logo.startsWith('http') 
+          ? companyProfile.logo 
+          : `${window.location.origin}${companyProfile.logo.startsWith('/') ? '' : '/'}${companyProfile.logo}`;
+          
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (isMounted && reader.result) {
+            setLogoSrc(reader.result as string);
+          }
+        };
+        reader.readAsDataURL(blob);
+      } catch (error) {
+        console.error('Failed to convert logo to base64:', error);
+      }
+    };
+
+    convertLogoToBase64();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div className="hidden print:block w-full border-b-2 border-gray-800 pb-2 mb-2">
       <div className="flex justify-between items-start w-full">
@@ -23,7 +54,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({ title, dynamicData }
         {/* Left Side: Logo */}
         <div className="flex-shrink-0 ml-2">
           <img 
-            src={companyProfile.logo} 
+            src={logoSrc} 
             alt="شعار المنشأة" 
             className="h-20 w-20 object-contain"
           />
