@@ -276,14 +276,7 @@ export default function Statements() {
                               </tr>
                             );
                           })}
-                          {/* Totals Row for Print */}
-                          <tr className="hidden print:table-row bg-gray-100 font-black border-t-2 border-gray-900">
-                            <td colSpan={3} className="px-4 py-2 text-center text-[11px] text-gray-900">إجماليات الشهر</td>
-                            <td className="px-1 py-2 text-[11px] text-red-900">{(statementData.records.reduce((acc, r) => acc + (r.allowance || 0), 0)).toLocaleString()}</td>
-                            <td className="px-1 py-2 text-[11px] text-red-900">{(statementData.records.reduce((acc, r) => acc + (r.advancePayment || 0), 0)).toLocaleString()}</td>
-                            <td className="px-1 py-2 text-[11px] text-red-900">{(statementData.records.reduce((acc, r) => acc + (r.delayMinutes || 0), 0)).toLocaleString()}</td>
-                            <td className="px-1 py-2 text-[11px]">-</td>
-                          </tr>
+
                         </tbody>
                       </table>
                     </div>
