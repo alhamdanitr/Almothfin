@@ -65,8 +65,9 @@
     border: 1px solid #cbd5e1 !important;
     font-size: 9.5pt !important;
     font-weight: 700 !important;
-    padding: 2px 4px !important; /* تقليل طفيف جداً لضمان بقاء الـ 31 يوماً في صفحة واحدة */
+    padding: 1px 4px !important; /* تقليل إضافي دقيق لضمان بقاء الـ 31 يوماً مع الشعار الكبير في صفحة واحدة */
     vertical-align: middle !important;
+    height: 6mm !important; /* ارتفاع ثابت ومحسوب بدقة */
   }
 
   /* كروت الملخص: تنسيق مدمج لضمان الصفحة الواحدة */
@@ -108,6 +109,6 @@
 
   /* تقليل المسافات البينية بشكل عام */
   .space-y-6 > * + * {
-    margin-top: 0.8rem !important;
+    margin-top: 0.6rem !important; /* تقليل المسافة البينية لتعويض كبر حجم الشعار */
   }
 }
