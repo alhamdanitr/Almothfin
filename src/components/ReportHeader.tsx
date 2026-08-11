@@ -11,15 +11,15 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({ title, dynamicData }
     <div className="hidden print:block w-full border-b-2 border-gray-900 pb-2 mb-1">
       <div className="flex justify-between items-center w-full mb-2">
         {/* Right Side: Company Details - Exact match to user's favorite bold style */}
-        <div className="text-right flex flex-col gap-0 max-w-[70%]">
-          <h1 className="text-[22px] font-[900] text-gray-900 tracking-tighter leading-none mb-1 font-cairo">
+        <div className="text-right flex flex-col gap-2 max-w-[75%]">
+          <h1 className="text-[24px] font-[900] text-gray-900 tracking-tight leading-tight mb-1 font-cairo">
             {companyProfile.name}
           </h1>
-          <div className="space-y-0">
-            <p className="text-[13px] font-[800] text-gray-800 font-cairo">{companyProfile.address}</p>
-            <p className="text-[13px] font-[800] text-gray-800 font-cairo" dir="rtl">
+          <div className="space-y-1.5">
+            <p className="text-[14px] font-[800] text-gray-800 font-cairo">{companyProfile.address}</p>
+            <p className="text-[14px] font-[800] text-gray-800 font-cairo" dir="rtl">
               <span className="ml-1">هاتف:</span>
-              <span dir="ltr" className="inline-block tracking-tight">{companyProfile.phones}</span>
+              <span dir="ltr" className="inline-block tracking-wider">{companyProfile.phones}</span>
             </p>
           </div>
         </div>

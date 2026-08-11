@@ -7,7 +7,7 @@
 @media print {
   @page {
     size: A4;
-    margin: 8mm 8mm !important; /* هوامش متوازنة وطبيعية */
+    margin: 8mm 10mm !important; /* زيادة الهامش الجانبي قليلاً للتوازن */
   }
 
   body {
@@ -18,6 +18,7 @@
     margin: 0 !important;
     padding: 0 !important;
     color: #000 !important;
+    width: 100% !important;
   }
 
   /* الحاوية الرئيسية للمحتوى */
@@ -39,9 +40,18 @@
   table {
     width: 100% !important;
     border-collapse: collapse !important;
-    margin-top: 5px !important;
-    table-layout: auto !important; /* العودة للوضع التلقائي لمنع "العجن" */
+    margin-top: 10px !important;
+    table-layout: fixed !important; /* استخدام fixed مع توزيع عرض الأعمدة يمنع العجن ويحافظ على العرض الكامل */
   }
+  
+  /* توزيع عرض الأعمدة بشكل متناسق */
+  th:nth-child(1), td:nth-child(1) { width: 15%; } /* التاريخ */
+  th:nth-child(2), td:nth-child(2) { width: 10%; } /* اليوم */
+  th:nth-child(3), td:nth-child(3) { width: 10%; } /* الحضور */
+  th:nth-child(4), td:nth-child(4) { width: 12%; } /* الصرفة */
+  th:nth-child(5), td:nth-child(5) { width: 12%; } /* السحبيات */
+  th:nth-child(6), td:nth-child(6) { width: 10%; } /* التأخير */
+  th:nth-child(7), td:nth-child(7) { width: 31%; } /* ملاحظات */
 
   th {
     background-color: #f8fafc !important;
