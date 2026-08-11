@@ -25,7 +25,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({ title, dynamicData }
           <img 
             src={companyProfile.logo} 
             alt="شعار المنشأة" 
-            className="h-14 w-auto object-contain"
+            className="h-24 w-auto object-contain mix-blend-multiply"
           />
         </div>
       </div>
