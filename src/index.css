@@ -7,11 +7,32 @@
 @media print {
   @page {
     size: A4;
-    margin: 3mm;
+    margin: 2mm; /* تقليل الهوامش لأقصى حد */
   }
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    font-size: 10pt;
+    line-height: 1.1;
+  }
+  img {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    display: block !important;
+    visibility: visible !important;
+  }
+  /* إجبار الجدول على عدم الانقسام وتصغير المسافات */
+  table {
+    page-break-inside: avoid;
+    width: 100% !important;
+  }
+  th, td {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+  }
+  /* منع أي فراغات زائدة بين العناصر في الطباعة */
+  .space-y-6 > * + * {
+    margin-top: 0.25rem !important;
   }
 }
 
