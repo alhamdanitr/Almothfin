@@ -213,8 +213,8 @@ export default function Statements() {
 
               {/* Details Table */}
               <div className="bg-white dark:bg-slate-800 shadow-sm rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border-gray-300 print:rounded-lg print:mb-1 print:border-none">
-                <div className="px-4 py-3 print:px-1 print:py-0.5 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/20 print:bg-transparent print:border-gray-300 flex justify-between items-center print:border-b-2">
-                  <h3 className="font-semibold text-gray-900 dark:text-white print:text-gray-900 print:text-[10px]">تفاصيل الحركات اليومية ({statementData.month})</h3>
+                <div className="px-4 py-3 print:hidden border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/20 flex justify-between items-center">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">تفاصيل الحركات اليومية ({statementData.month})</h3>
                 </div>
                 {statementData.records.length === 0 ? (
                   <div className="p-8 text-center text-gray-500 dark:text-gray-400 print:text-gray-600 print:text-sm">
