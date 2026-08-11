@@ -7,43 +7,51 @@
 @media print {
   @page {
     size: A4;
-    margin: 10mm 8mm; /* هوامش متوازنة ومريحة للعين */
+    margin: 5mm 5mm; /* هوامش ضيقة لضمان بقاء كل شيء في صفحة واحدة */
   }
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    font-size: 11pt; /* خط أوضح وأكبر */
-    line-height: 1.4;
+    font-size: 10.5pt;
+    line-height: 1.2;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   img {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     display: block !important;
-    visibility: visible !important;
   }
-  /* إجبار الجدول على ملء الصفحة بشكل متناسق */
+  /* منع أي انقسام للصفحة تماماً للمحتوى المطبوع */
+  .print\:block {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-before: auto !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
   table {
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
     width: 100% !important;
     border-collapse: collapse;
+    margin-bottom: 5px !important;
   }
   th {
-    padding: 8px 4px !important;
-    background-color: #f8fafc !important;
+    padding: 6px 2px !important;
     border-bottom: 2px solid #000 !important;
+    font-size: 10pt !important;
   }
   td {
-    padding: 6px 4px !important; /* مسافات داخلية تجعل الجدول يملأ الورقة */
-    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 4px 2px !important;
+    border-bottom: 1px solid #eee !important;
+    font-size: 9.5pt !important;
   }
-  /* تحسين توزيع المساحات بين الأقسام */
+  /* تقليل المسافات العلوية في الطباعة لمنع ظهور صفحات فارغة */
   .space-y-6 > * + * {
-    margin-top: 1.5rem !important;
+    margin-top: 0.5rem !important;
   }
-  /* منع انقسام كروت الملخص عن الجدول */
-  .print\:block {
-    page-break-inside: avoid;
-    break-inside: avoid;
+  header, footer, nav, .no-print {
+    display: none !important;
   }
 }
 

@@ -8,28 +8,28 @@ export interface ReportHeaderProps {
 
 export const ReportHeader: React.FC<ReportHeaderProps> = ({ title, dynamicData }) => {
   return (
-    <div className="hidden print:block w-full border-b-4 border-double border-gray-900 pb-4 mb-4">
-      <div className="flex justify-between items-center w-full mb-4">
+    <div className="hidden print:block w-full border-b-2 border-gray-900 pb-2 mb-2">
+      <div className="flex justify-between items-center w-full mb-2">
         {/* Right Side: Company Details - Professional Layout */}
-        <div className="text-right flex flex-col gap-1 max-w-[60%]">
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight leading-tight mb-1">
+        <div className="text-right flex flex-col gap-0.5 max-w-[65%]">
+          <h1 className="text-xl font-black text-gray-900 tracking-tight leading-tight">
             {companyProfile.name}
           </h1>
-          <div className="space-y-0.5">
-            <p className="text-sm font-bold text-gray-800">{companyProfile.address}</p>
-            <p className="text-sm font-bold text-gray-800" dir="rtl">
+          <div className="space-y-0">
+            <p className="text-xs font-bold text-gray-800">{companyProfile.address}</p>
+            <p className="text-xs font-bold text-gray-800" dir="rtl">
               <span className="ml-1">هاتف:</span>
-              <span dir="ltr" className="inline-block tracking-wider">{companyProfile.phones}</span>
+              <span dir="ltr" className="inline-block tracking-tight">{companyProfile.phones}</span>
             </p>
           </div>
         </div>
         
-        {/* Left Side: Larger & Prominent Logo - Slightly Increased Size */}
-        <div className="flex-shrink-0 ml-4 print:block">
+        {/* Left Side: Optimized Logo Size for Single Page */}
+        <div className="flex-shrink-0 ml-2 print:block">
           <img 
             src={companyProfile.logo} 
             alt="شعار المنشأة" 
-            className="h-40 w-40 object-contain print:block print:max-h-40 print:max-w-40 drop-shadow-sm"
+            className="h-28 w-28 object-contain print:block print:max-h-28 print:max-w-28"
             style={{ display: 'block', visibility: 'visible', printColorAdjust: 'exact' }}
           />
         </div>
