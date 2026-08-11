@@ -7,12 +7,12 @@
 @media print {
   @page {
     size: A4;
-    margin: 5mm 5mm; /* هوامش ضيقة لضمان بقاء كل شيء في صفحة واحدة */
+    margin: 8mm 6mm !important; /* هوامش متوازنة تمنع خروج المحتوى */
   }
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    font-size: 10.5pt;
+    font-size: 10pt;
     line-height: 1.2;
     margin: 0 !important;
     padding: 0 !important;
@@ -22,33 +22,48 @@
     print-color-adjust: exact;
     display: block !important;
   }
-  /* منع أي انقسام للصفحة تماماً للمحتوى المطبوع */
-  .print\:block {
+  /* حل جذري: منع انقسام الحاوية الرئيسية للتقرير */
+  [ref="printRef"], .print\:block {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    page-break-before: auto !important;
-    margin-top: 0 !important;
-    padding-top: 0 !important;
+    display: block !important;
   }
   table {
     page-break-inside: avoid !important;
     width: 100% !important;
     border-collapse: collapse;
-    margin-bottom: 5px !important;
+    margin-bottom: 8px !important;
+    table-layout: auto !important;
   }
   th {
-    padding: 6px 2px !important;
+    padding: 5px 2px !important;
     border-bottom: 2px solid #000 !important;
-    font-size: 10pt !important;
+    font-size: 9pt !important;
+    background-color: #f1f5f9 !important;
   }
   td {
-    padding: 8px 4px !important; /* زيادة المسافة العمودية لملء الورقة بعد حذف صف الإجماليات */
-    border-bottom: 1px solid #eee !important;
-    font-size: 10.5pt !important; /* تكبير طفيف جداً للوضوح */
+    padding: 4px 2px !important; /* توازن المسافة لضمان بقاء الملخص في نفس الصفحة */
+    border-bottom: 1px solid #e2e8f0 !important;
+    font-size: 9pt !important;
   }
-  /* تقليل المسافات العلوية في الطباعة لمنع ظهور صفحات فارغة */
+  /* تصغير كروت الملخص في الطباعة لضمان ملاءمتها مع الجدول */
+  .grid.print\:grid-cols-5 {
+    gap: 4px !important;
+    margin-top: 10px !important;
+    page-break-inside: avoid !important;
+  }
+  .grid.print\:grid-cols-5 > div {
+    padding: 4px !important;
+    border: 1px solid #000 !important;
+    border-radius: 4px !important;
+  }
+  .grid.print\:grid-cols-5 p {
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+  /* تقليل المسافات البينية بشكل عام في الطباعة */
   .space-y-6 > * + * {
-    margin-top: 0.5rem !important;
+    margin-top: 0.4rem !important;
   }
   header, footer, nav, .no-print {
     display: none !important;
