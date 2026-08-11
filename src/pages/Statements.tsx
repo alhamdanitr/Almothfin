@@ -355,9 +355,9 @@ export default function Statements() {
                   <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-900">إجمالي الخصومات</p>
                   <p className="text-xl font-bold text-red-500 mt-1 value print:text-red-700">{(statementData.summary.totalDiscounts || 0).toLocaleString()} ر.ي</p>
                 </div>
-                <div className="bg-indigo-600 rounded-2xl p-4 lg:p-5 shadow-sm text-white print-summary-card print:bg-gray-900 print:text-white">
-                  <p className="text-indigo-100 text-sm print:text-white print:font-bold">الصافي المتبقي</p>
-                  <p className="text-2xl font-bold mt-1 value print:text-white">{(statementData.summary.netSalary || 0).toLocaleString()} ر.ي</p>
+                <div className="bg-indigo-600 rounded-2xl p-4 lg:p-5 shadow-sm text-white print-summary-card print:bg-white print:text-black print:border-2 print:border-black">
+                  <p className="text-indigo-100 text-sm print:text-black print:font-extrabold">الصافي المتبقي</p>
+                  <p className="text-2xl font-bold mt-1 value print:text-black print:font-black">{(statementData.summary.netSalary || 0).toLocaleString()} ر.ي</p>
                 </div>
               </div>
             </div>

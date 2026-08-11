@@ -81,25 +81,31 @@
 
   .print-summary-card {
     border: 2px solid #000 !important;
-    border-radius: 8px !important;
-    padding: 6px 4px !important;
+    border-radius: 6px !important;
+    padding: 3px 2px !important; /* تقليل الارتفاع بشكل ملحوظ لضمان الصفحة الواحدة */
     text-align: center !important;
     background: white !important;
+    color: black !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    min-height: 12mm !important;
   }
 
   .print-summary-card p {
     margin: 0 !important;
-    font-weight: 800 !important;
-    font-size: 9pt !important;
+    font-weight: 900 !important;
+    font-size: 8.5pt !important;
+    color: black !important;
   }
 
   .print-summary-card .value {
-    font-size: 11pt !important;
+    font-size: 10.5pt !important;
     font-weight: 900 !important;
-    margin-top: 2px !important;
+    margin-top: 1px !important;
     display: block !important;
     visibility: visible !important;
-    color: inherit !important;
+    color: black !important;
   }
 
   /* إخفاء العناصر غير الضرورية */
