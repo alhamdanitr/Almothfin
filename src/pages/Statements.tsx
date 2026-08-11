@@ -341,7 +341,7 @@ export default function Statements() {
                 <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print-summary-card">
                   <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-900">الراتب المستحق</p>
                   <p className="text-xl font-bold text-gray-900 dark:text-white mt-1 value">{(statementData.summary.totalEarned || 0).toLocaleString()} ر.ي</p>
-                  <p className="text-xs text-gray-400 mt-1 print:hidden">({statementData.summary.daysPresent + (statementData.summary.daysHalf * 0.5)} يوم)</p>
+                  <p className="text-xs text-gray-400 mt-1 print:block print:text-[8px] print:font-bold">({statementData.summary.daysPresent + (statementData.summary.daysHalf * 0.5)} يوم)</p>
                 </div>
                 <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print-summary-card">
                   <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-900">إجمالي الصرفيات</p>
@@ -356,8 +356,8 @@ export default function Statements() {
                   <p className="text-xl font-bold text-red-500 mt-1 value print:text-red-700">{(statementData.summary.totalDiscounts || 0).toLocaleString()} ر.ي</p>
                 </div>
                 <div className="bg-indigo-600 rounded-2xl p-4 lg:p-5 shadow-sm text-white print-summary-card print:bg-gray-900 print:text-white">
-                  <p className="text-indigo-100 text-sm print:text-white">الصافي المتبقي</p>
-                  <p className="text-2xl font-bold mt-1 value">{(statementData.summary.netSalary || 0).toLocaleString()} ر.ي</p>
+                  <p className="text-indigo-100 text-sm print:text-white print:font-bold">الصافي المتبقي</p>
+                  <p className="text-2xl font-bold mt-1 value print:text-white">{(statementData.summary.netSalary || 0).toLocaleString()} ر.ي</p>
                 </div>
               </div>
             </div>

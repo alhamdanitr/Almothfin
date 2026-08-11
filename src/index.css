@@ -63,9 +63,9 @@
 
   td {
     border: 1px solid #cbd5e1 !important;
-    font-size: 10pt !important;
+    font-size: 9.5pt !important;
     font-weight: 700 !important;
-    padding: 5px 4px !important; /* مسافة طبيعية ومريحة */
+    padding: 2px 4px !important; /* تقليل طفيف جداً لضمان بقاء الـ 31 يوماً في صفحة واحدة */
     vertical-align: middle !important;
   }
 
@@ -96,6 +96,9 @@
     font-size: 11pt !important;
     font-weight: 900 !important;
     margin-top: 2px !important;
+    display: block !important;
+    visibility: visible !important;
+    color: inherit !important;
   }
 
   /* إخفاء العناصر غير الضرورية */
