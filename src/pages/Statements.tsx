@@ -199,8 +199,7 @@ export default function Statements() {
           {statementDataByMonth.map((statementData, index) => (
             <div 
               key={statementData.month} 
-              className={`space-y-6 print:block print:p-0 ${index > 0 ? 'mt-12 print:mt-0 border-t-4 border-dashed border-gray-200 print:border-none pt-12 print:pt-0' : ''}`}
-              style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}
+              className="print-month-container space-y-2"
             >
               {/* Print Header - Unified Report Header */}
               <ReportHeader 
@@ -338,27 +337,27 @@ export default function Statements() {
               </div>
 
               {/* Summary Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 print:grid-cols-5 print:gap-1 mt-6 print:mt-1">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border print:border-gray-300 print:bg-white print:p-1 print:rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:text-[9px] print:font-semibold">الراتب المستحق</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white mt-1 print:text-gray-900 print:text-[11px]">{(statementData.summary.totalEarned || 0).toLocaleString()} ر.ي</p>
-                  <p className="text-xs text-gray-400 mt-1 print:text-gray-500 print:text-[8px]">({statementData.summary.daysPresent + (statementData.summary.daysHalf * 0.5)} يوم)</p>
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 print-summary-grid mt-6 print:mt-1">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print-summary-card">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-900">الراتب المستحق</p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-white mt-1 value">{(statementData.summary.totalEarned || 0).toLocaleString()} ر.ي</p>
+                  <p className="text-xs text-gray-400 mt-1 print:hidden">({statementData.summary.daysPresent + (statementData.summary.daysHalf * 0.5)} يوم)</p>
                 </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border print:border-gray-300 print:bg-white print:p-1 print:rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:text-[9px] print:font-semibold">إجمالي الصرفيات</p>
-                  <p className="text-xl font-bold text-red-500 mt-1 print:text-red-700 print:text-[11px]">{(statementData.summary.totalAllowance || 0).toLocaleString()} ر.ي</p>
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print-summary-card">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-900">إجمالي الصرفيات</p>
+                  <p className="text-xl font-bold text-red-500 mt-1 value print:text-red-700">{(statementData.summary.totalAllowance || 0).toLocaleString()} ر.ي</p>
                 </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border print:border-gray-300 print:bg-white print:p-1 print:rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:text-[9px] print:font-semibold">إجمالي السحبيات</p>
-                  <p className="text-xl font-bold text-red-500 mt-1 print:text-red-700 print:text-[11px]">{(statementData.summary.totalAdvances || 0).toLocaleString()} ر.ي</p>
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print-summary-card">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-900">إجمالي السحبيات</p>
+                  <p className="text-xl font-bold text-red-500 mt-1 value print:text-red-700">{(statementData.summary.totalAdvances || 0).toLocaleString()} ر.ي</p>
                 </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print:shadow-none print:border print:border-gray-300 print:bg-white print:p-1 print:rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-600 print:text-[9px] print:font-semibold">إجمالي الخصومات</p>
-                  <p className="text-xl font-bold text-red-500 mt-1 print:text-red-700 print:text-[11px]">{(statementData.summary.totalDiscounts || 0).toLocaleString()} ر.ي</p>
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print-summary-card">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-900">إجمالي الخصومات</p>
+                  <p className="text-xl font-bold text-red-500 mt-1 value print:text-red-700">{(statementData.summary.totalDiscounts || 0).toLocaleString()} ر.ي</p>
                 </div>
-                <div className="bg-indigo-600 rounded-2xl p-4 lg:p-5 shadow-sm text-white print:bg-gray-800 print:text-white print:border-none print:shadow-sm col-span-2 lg:col-span-1 flex flex-col justify-center print:col-span-1 print:p-1 print:rounded-lg">
-                  <p className="text-indigo-100 text-sm print:text-gray-200 print:text-[9px] font-medium">الصافي المتبقي</p>
-                  <p className="text-2xl font-bold mt-1 print:text-white print:text-[13px]">{(statementData.summary.netSalary || 0).toLocaleString()} ر.ي</p>
+                <div className="bg-indigo-600 rounded-2xl p-4 lg:p-5 shadow-sm text-white print-summary-card print:bg-gray-900 print:text-white">
+                  <p className="text-indigo-100 text-sm print:text-white">الصافي المتبقي</p>
+                  <p className="text-2xl font-bold mt-1 value">{(statementData.summary.netSalary || 0).toLocaleString()} ر.ي</p>
                 </div>
               </div>
             </div>
