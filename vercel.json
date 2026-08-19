@@ -1,0 +1,13 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/parse-attendance.ts": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    { "source": "/api/parse-attendance", "destination": "/api/parse-attendance.ts" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}
