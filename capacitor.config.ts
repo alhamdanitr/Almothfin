@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.almothfin.workers',
   appName: 'إدارة العمال',
   webDir: 'dist',
-  bundledWebRuntime: false,
   server: {
     androidScheme: 'https'
   }

@@ -5,6 +5,7 @@ import { AttendanceStatus, DailyRecord } from '../types';
 
 interface SmartEntryModalProps { onClose: () => void; }
 type ChatMessage = { role: 'user' | 'assistant'; text: string };
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://almothfin.vercel.app').replace(/\/$/, '');
 
 export function SmartEntryModal({ onClose }: SmartEntryModalProps) {
   const { workers, records, addBulkRecords } = useStore();
@@ -30,7 +31,7 @@ export function SmartEntryModal({ onClose }: SmartEntryModalProps) {
     const nextChat = [...chat, { role: 'user' as const, text: text.trim() }];
     saveChat(nextChat);
     try {
-      const response = await fetch('/api/parse-attendance', {
+      const response = await fetch(`${API_BASE_URL}/api/parse-attendance`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, workers: activeWorkers, existingRecords: records, fallbackDate: new Date().toISOString().slice(0, 10) })
       });
