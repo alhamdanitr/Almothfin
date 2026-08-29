@@ -6,111 +6,100 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
-  
-  app.use(express.json());
+const app = express();
+app.use(express.json({ limit: "1mb" }));
 
-  // API routes
-  app.post("/api/parse-attendance", async (req, res) => {
-    try {
-      const { text, workers, fallbackDate } = req.body;
-      
-      if (!process.env.GEMINI_API_KEY) {
-        return res.status(500).json({ error: "GEMINI_API_KEY environment variable is required" });
+const extractionSchema = {
+  type: Type.OBJECT,
+  properties: {
+    records: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          workerId: { type: Type.STRING },
+          date: { type: Type.STRING, description: "YYYY-MM-DD" },
+          attendance: { type: Type.STRING, description: "full, half, or absent" },
+          allowance: { type: Type.NUMBER, description: "الصرفة اليومية" },
+          advancePayment: { type: Type.NUMBER, description: "السحبية فقط" },
+          delayMinutes: { type: Type.NUMBER },
+          note: { type: Type.STRING },
+          confidence: { type: Type.NUMBER, description: "0 to 1" },
+          warning: { type: Type.STRING }
+        },
+        required: ["workerId", "date", "attendance", "allowance", "advancePayment", "delayMinutes", "note", "confidence", "warning"]
       }
+    },
+    warnings: { type: Type.ARRAY, items: { type: Type.STRING } }
+  },
+  required: ["records", "warnings"]
+};
 
-      const ai = new GoogleGenAI({ 
-        apiKey: process.env.GEMINI_API_KEY,
-        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-      });
-      
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: `You are a highly precise and strict data extraction AI for an attendance and payroll system. Your task is to analyze Arabic text to extract attendance and payment records with 100% accuracy. You must NOT mix up worker data.
+app.post("/api/parse-attendance", async (req, res) => {
+  try {
+    const { text, workers = [], fallbackDate, existingRecords = [] } = req.body || {};
+    if (!text?.trim()) return res.status(400).json({ error: "أرسل نص الترحيل أولاً." });
+    if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: "لم يتم إعداد مفتاح المساعد في Vercel." });
 
-Text from user:
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, httpOptions: { headers: { "User-Agent": "almothfin-assistant" } } });
+    const response = await ai.models.generateContent({
+      model: process.env.GEMINI_MODEL || "gemini-3-flash-preview",
+      contents: `أنت مساعد تدقيق وترحيل مالي لنظام إدارة عمال. استخرج البيانات العربية بدقة، ولا تخمّن عند وجود غموض.
+
+قائمة العمال المسموح بها:
+${JSON.stringify(workers.map((w: any) => ({ id: w.id, name: w.name, workerNumber: w.workerNumber })))}
+
+السجلات الموجودة مسبقًا:
+${JSON.stringify(existingRecords.map((r: any) => ({ workerId: r.workerId, date: r.date })))}
+
+النص الوارد:
 ${text}
 
-Available workers list:
-${JSON.stringify(workers.map((w: any) => ({id: w.id, name: w.name, workerNumber: w.workerNumber})))}
+التاريخ الافتراضي: ${fallbackDate || "2026-01-01"}
 
-Fallback Date (YYYY-MM-DD): ${fallbackDate}
-
-Rules:
-1. Strict Identity Matching: Match the names in the text EXACTLY to the names in the 'Available workers list'. If a name matches multiple workers slightly, pick the exact match. Do not guess wildly. Return the exact 'workerId'.
-2. Attendance Status: 
-   - If the text says "غياب" (absent) next to a name, set 'attendance' to 'absent'.
-   - If the text says "نصف" or "داوم ساعتين" or implies a partial day, set 'attendance' to 'half'.
-   - Otherwise, default to 'full' (حاضر).
-3. Payments: 
-   - There are two distinct types of payments: "سحبيات" (Advance Payment) and "صرفة" (Allowance).
-   - 'advancePayment' (سحبيات): A general financial amount taken by the worker. If a number appears next to a name without the word "صرفة", treat it as 'advancePayment' (e.g., "محمد 4000" means advancePayment: 4000).
-   - 'allowance' (صرفة): An allowance is ONLY recorded if the word "صرفة" is explicitly mentioned with an amount (e.g., "محمد صرفة 2000" means allowance: 2000).
-   - Do NOT combine them. If both exist, parse both.
-4. Delays:
-   - If the text mentions a delay (تأخير / تاخير) in hours or minutes (e.g., "تأخير ساعتين", "تاخير ساعة ونص", "تأخير نصف ساعة"), convert it to minutes and set 'delayMinutes' (e.g., "ساعتين" = 120, "ساعة" = 60, "ساعة ونص" = 90).
-5. Date parsing: If the text contains a date (e.g. "السبت 18/7" or "18-7"), parse it into YYYY-MM-DD format using the current year (2026). If there is absolutely no date, use the '${fallbackDate}'.
-6. Do not hallucinate workers that are not in the list.
-
-Return JSON matching this schema exactly. Do not output markdown, just the JSON array.`,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                workerId: { type: Type.STRING },
-                date: { type: Type.STRING, description: "YYYY-MM-DD" },
-                attendance: { type: Type.STRING, description: "'full' or 'half' or 'absent'" },
-                advancePayment: { type: Type.NUMBER, description: "General advance payment (سحبيات)" },
-                allowance: { type: Type.NUMBER, description: "Specific allowance (صرفة)" },
-                delayMinutes: { type: Type.NUMBER },
-                note: { type: Type.STRING }
-              },
-              required: ["workerId", "date", "attendance"]
-            }
-          }
-        }
-      });
-
-      res.json({ records: JSON.parse(response.text || "[]") });
-    } catch (e: any) {
-      console.error(e);
-      let errorMessage = e.message;
-      try {
-        const parsed = JSON.parse(e.message);
-        if (parsed.error && parsed.error.message) {
-          errorMessage = parsed.error.message;
-        } else if (parsed.message) {
-          errorMessage = parsed.message;
-        }
-      } catch (parseErr) {
-        // Not JSON
-      }
-      res.status(500).json({ error: errorMessage });
-    }
-  });
-
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
+القواعد الإلزامية:
+1. طابق الاسم مع القائمة فقط. إذا لم تجد تطابقًا موثوقًا، لا تنشئ سجلًا؛ ضع تحذيرًا.
+2. المبلغ بجانب الاسم بلا وصف هو الصرفة اليومية، أي allowance. لا تحوله إلى سحبية.
+3. المبلغ الذي بجانبه «سحبية» أو «سحبيات» هو advancePayment مستقل، والصرفة تبقى منفصلة إن وُجدت.
+4. إذا ذُكرت «غياب» فالحضور absent، وإذا ذُكر «نصف يوم» أو «داوم ساعتين» فالحضور half. لا تحذف الصرفة إلا إذا طلب النص ذلك صراحة.
+5. حوّل التأخير إلى دقائق: ساعة=60، ساعتان=120، أربع ساعات=240، ونصف ساعة=30.
+6. صحح اليوم والتاريخ فقط إذا كان النص واضحًا أو قدم المستخدم تصحيحًا صريحًا. إذا تعارض رقم التاريخ مع اسم اليوم، لا تخمّن؛ أضف تحذيرًا.
+7. استخدم سنة 2026 عند غياب السنة.
+8. إذا كان workerId والتاريخ موجودين في السجلات السابقة، ضع warning يذكر أنه مكرر. لا تُنشئ سجلًا بديلًا.
+9. «+3000 إضافي» بدون كلمة سحبية أو صرفة يوضع في note ولا يضاف إلى أي مجموع.
+10. المصروفات العامة، والتصفية، وأي مبلغ ليس مرتبطًا بموظف يجب أن يظهر في warnings ولا يتحول إلى سجل.
+11. أعد JSON مطابقًا للمخطط فقط. confidence أقل من 0.85 عند أي غموض، واكتب سبب الغموض في warning.`,
+      config: { responseMimeType: "application/json", responseSchema: extractionSchema }
     });
+    const parsed = JSON.parse(response.text || '{"records":[],"warnings":[]}');
+    const existingKeys = new Set(existingRecords.map((r: any) => `${r.workerId}:${r.date}`));
+    const validWorkerIds = new Set(workers.map((w: any) => w.id));
+    const records = (parsed.records || []).map((r: any) => ({ ...r, duplicate: existingKeys.has(`${r.workerId}:${r.date}`), unknownWorker: !validWorkerIds.has(r.workerId) }));
+    const warnings = [...(parsed.warnings || [])];
+    records.forEach((r: any) => {
+      if (r.duplicate) warnings.push(`السجل مكرر وموجود مسبقًا: ${r.date}`);
+      if (r.unknownWorker) warnings.push(`تعذر مطابقة عامل في ${r.date}`);
+    });
+    res.json({ records, warnings, requiresReview: warnings.length > 0 || records.some((r: any) => r.confidence < 0.85 || r.duplicate || r.unknownWorker) });
+  } catch (e: any) {
+    console.error("assistant parse error", e);
+    res.status(500).json({ error: e?.message || "تعذر تحليل الرسالة." });
+  }
+});
+
+async function startServer() {
+  const PORT = Number(process.env.PORT || 3000);
+  if (process.env.NODE_ENV !== "production") {
+    const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
+    app.get("*", (_req, res) => res.sendFile(path.join(distPath, "index.html")));
   }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  app.listen(PORT, "0.0.0.0", () => console.log(`Server running on http://localhost:${PORT}`));
 }
-
 startServer();
+export default app;
+
+// Vercel uses the exported Express app through the project build configuration.
