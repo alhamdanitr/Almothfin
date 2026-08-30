@@ -38,8 +38,11 @@
 
   /* تكبير الشعار بصريًا داخل نفس الحيز دون زيادة ارتفاع الرأس أو دفع الجدول */
   .report-logo {
-    transform: scale(1.22) !important;
+    transform: scale(1.55) !important;
     transform-origin: center left !important;
+    position: relative !important;
+    z-index: 2 !important;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.22)) !important;
   }
 
   /* الجدول: العودة للعرض الطبيعي والواضح */
