@@ -1,48 +1,115 @@
-import { GoogleGenAI, Type } from '@google/genai';
-
-const schema = {
-  type: Type.OBJECT,
-  properties: {
-    records: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: {
-      workerId: { type: Type.STRING }, date: { type: Type.STRING }, attendance: { type: Type.STRING },
-      allowance: { type: Type.NUMBER }, advancePayment: { type: Type.NUMBER }, delayMinutes: { type: Type.NUMBER },
-      note: { type: Type.STRING }, confidence: { type: Type.NUMBER }, warning: { type: Type.STRING }
-    }, required: ['workerId','date','attendance','allowance','advancePayment','delayMinutes','note','confidence','warning'] } },
-    warnings: { type: Type.ARRAY, items: { type: Type.STRING } }
-  }, required: ['records','warnings']
+type Worker = { id: string; name: string; workerNumber?: string | number };
+type ExistingRecord = { workerId: string; date: string };
+type ParsedRecord = {
+  workerId: string; date: string; attendance: 'present' | 'absent' | 'half';
+  allowance: number; advancePayment: number; delayMinutes: number; note: string;
+  confidence: number; warning: string; duplicate: boolean; unknownWorker: boolean;
 };
+
+const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+const toLatin = (value: string) => value.replace(/[٠-٩]/g, d => String(arabicDigits.indexOf(d))).replace(/[،٬]/g, ',');
+const clean = (value: string) => toLatin(value).replace(/[إأآ]/g, 'ا').replace(/ى/g, 'ي').toLowerCase();
+const amountValue = (token: string) => Number(token.replace(/[,+،٬]/g, '')) || 0;
+
+function dateFromText(line: string, fallbackDate?: string): string | null {
+  const normalized = toLatin(line);
+  const iso = normalized.match(/(20\d{2})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (iso) return `${iso[1]}-${iso[2].padStart(2, '0')}-${iso[3].padStart(2, '0')}`;
+  const short = normalized.match(/(?:^|\s)(\d{1,2})\s*[/\\-]\s*(\d{1,2})(?:\s|$)/);
+  if (!short) return null;
+  const year = (fallbackDate || '2026-01-01').slice(0, 4);
+  return `${year}-${short[2].padStart(2, '0')}-${short[1].padStart(2, '0')}`;
+}
+
+function delayMinutes(line: string): number {
+  const s = clean(line);
+  if (!/(تاخير|تأخير)/.test(line)) return 0;
+  if (/(نص|نصف)\s*(ساعه|ساعة)/.test(s)) return 30;
+  if (/(ساعتين|ساعتان|2\s*ساع)/.test(s)) return 120;
+  const hours = s.match(/(?:تاخير|تأخير)[^\d٠-٩]{0,8}(\d+)\s*ساع/);
+  if (hours) return amountValue(hours[1]) * 60;
+  if (/(4\s*ساع|اربع\s*ساع)/.test(s)) return 240;
+  if (/(3\s*ساع|ثلاث\s*ساع)/.test(s)) return 180;
+  if (/(ساعه|ساعة|1\s*ساع)/.test(s)) return 60;
+  const direct = s.match(/(?:تاخير|تأخير)\D*(\d+)/);
+  return direct ? amountValue(direct[1]) * 60 : 0;
+}
+
+function parseLine(line: string, currentDate: string | null, workers: Worker[], existingKeys: Set<string>): { record?: ParsedRecord; warning?: string } {
+  const normalized = clean(line);
+  if (!currentDate) return { warning: `تعذر تحديد تاريخ السطر: ${line}` };
+  const worker = [...workers].sort((a, b) => b.name.length - a.name.length).find(w => normalized.includes(clean(w.name)));
+  if (!worker) return { warning: `تعذر مطابقة موظف في السطر: ${line}` };
+
+  const attendance: 'present' | 'absent' | 'half' = /(غياب|غائب|ما\s*داوم)/.test(normalized)
+    ? 'absent' : /(نص\s*يوم|نصف\s*يوم|داوم\s*ساعتين|داوم\s*ساعتان)/.test(normalized) ? 'half' : 'present';
+  const warningParts: string[] = [];
+  if (attendance === 'absent' && /(نص\s*يوم|نصف\s*يوم)/.test(normalized)) warningParts.push('السطر يحتوي غيابًا ونصف يوم معًا');
+
+  const rawNumbers = [...toLatin(line).matchAll(/[+]?(?:\d{1,3}(?:,\d{3})+|\d+)/g)].map(m => ({ token: m[0], start: m.index ?? 0, end: (m.index ?? 0) + m[0].length, value: amountValue(m[0]) }));
+  const delayWord = line.search(/تاخير|تأخير/);
+  const extraWord = normalized.search(/اضافي|إضافي/);
+  const numbers = rawNumbers.filter(n => n.value >= 100 && !(delayWord >= 0 && n.start >= delayWord && n.start <= delayWord + 14));
+  const extra = extraWord >= 0 ? numbers.find(n => Math.abs(n.start - extraWord) <= 18) : undefined;
+  const operational = extra ? numbers.filter(n => n !== extra) : numbers;
+  const advanceWords = /(سحبي|سحبيه|سحبية|سحب|سلف|سلفة|سلفه)/;
+  const advance = operational.find(n => advanceWords.test(normalized) && Math.abs(normalized.indexOf('سحب') >= 0 ? n.start - normalized.indexOf('سحب') : n.start - normalized.indexOf('سلف')) <= 24);
+  const advancePayment = advance ? advance.value : (advanceWords.test(normalized) && operational.length === 1 ? operational[0].value : 0);
+  const remaining = operational.filter(n => n !== advance);
+  const allowance = remaining.length ? remaining[0].value : 0;
+  if (operational.length > 2) warningParts.push('يوجد أكثر من مبلغ تشغيلي في السطر');
+  if (extra && extra.value < 100) warningParts.push('مبلغ الإضافي أقل من 3 خانات');
+  const note = extra ? `${extra.value} اضافي` : '';
+  const key = `${worker.id}:${currentDate}`;
+  const duplicate = existingKeys.has(key);
+  if (duplicate) warningParts.push('السجل موجود مسبقًا ولن يتم تعديله');
+  const warning = warningParts.join('، ');
+  return { record: {
+    workerId: worker.id, date: currentDate, attendance,
+    allowance, advancePayment, delayMinutes: delayMinutes(line), note,
+    confidence: warning ? 0.7 : 1, warning, duplicate, unknownWorker: false
+  }};
+}
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'الطريقة غير مسموحة.' });
   try {
     const { text, workers = [], fallbackDate, existingRecords = [] } = req.body || {};
     if (!text?.trim()) return res.status(400).json({ error: 'أرسل نص الترحيل أولاً.' });
-    if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'لم يتم إعداد GEMINI_API_KEY في بيئة Vercel.' });
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    const prompt = `أنت مساعد تدقيق وترحيل مالي لنظام إدارة عمال. استخرج البيانات العربية بدقة، ولا تخمّن عند وجود غموض.
-قائمة العمال المسموح بها: ${JSON.stringify(workers.map((w: any) => ({ id: w.id, name: w.name, workerNumber: w.workerNumber })))}
-السجلات الموجودة مسبقًا: ${JSON.stringify(existingRecords.map((r: any) => ({ workerId: r.workerId, date: r.date })))}
-النص الوارد: ${text}
-التاريخ الافتراضي: ${fallbackDate || '2026-01-01'}
-القواعد الإلزامية:
-- طابق الاسم مع القائمة فقط، ولا تنشئ عاملًا غير موجود.
-- المبلغ بجانب الاسم بلا وصف هو الصرفة اليومية allowance.
-- المبلغ الذي بجانبه «سحبية» أو «سحبيات» هو advancePayment مستقل.
-- «غياب» = absent، و«نصف يوم» أو «داوم ساعتين» = half.
-- حوّل ساعة إلى 60 دقيقة، ساعتين إلى 120، أربع ساعات إلى 240، ونصف ساعة إلى 30.
-- صحح التاريخ فقط إذا كان واضحًا أو صححه المستخدم صراحة، وإلا أضف تحذيرًا.
-- إذا كان العامل والتاريخ موجودين مسبقًا، ضع warning بأنه مكرر ولا تعدله.
-- «+3000 إضافي» بلا وصف يوضع في note ولا يضاف إلى المجموع.
-- التصفية والمصروفات العامة والأسماء غير المطابقة تظهر في warnings ولا تتحول إلى سجلات.
-- confidence أقل من 0.85 عند الغموض. أعد JSON مطابقًا للمخطط فقط.`;
-    const response = await ai.models.generateContent({ model: process.env.GEMINI_MODEL || 'gemini-3-flash-preview', contents: prompt, config: { responseMimeType: 'application/json', responseSchema: schema } });
-    const parsed = JSON.parse(response.text || '{"records":[],"warnings":[]}');
-    const existingKeys = new Set(existingRecords.map((r: any) => `${r.workerId}:${r.date}`));
-    const workerIds = new Set(workers.map((w: any) => w.id));
-    const records = (parsed.records || []).map((r: any) => ({ ...r, duplicate: existingKeys.has(`${r.workerId}:${r.date}`), unknownWorker: !workerIds.has(r.workerId) }));
-    const warnings = [...(parsed.warnings || [])];
-    records.forEach((r: any) => { if (r.duplicate) warnings.push(`السجل مكرر وموجود مسبقًا: ${r.date}`); if (r.unknownWorker) warnings.push(`تعذر مطابقة عامل في ${r.date}`); });
-    return res.status(200).json({ records, warnings, requiresReview: warnings.length > 0 || records.some((r: any) => r.confidence < 0.85 || r.duplicate || r.unknownWorker) });
+    const existingKeys = new Set((existingRecords as ExistingRecord[]).map(r => `${r.workerId}:${r.date}`));
+    const records: ParsedRecord[] = [];
+    const warnings: string[] = [];
+    let currentDate: string | null = null;
+    for (const line of String(text).split(/\r?\n/).map(s => s.trim()).filter(Boolean)) {
+      const foundDate = dateFromText(line, fallbackDate);
+      if (foundDate) { currentDate = foundDate; if (!workers.some((w: Worker) => clean(line).includes(clean(w.name)))) continue; }
+      const result = parseLine(line, currentDate, workers as Worker[], existingKeys);
+      if (result.record) { records.push(result.record); if (result.record.warning) warnings.push(`${result.record.date}: ${result.record.warning}`); }
+      else if (result.warning && /\d/.test(toLatin(line))) warnings.push(result.warning);
+    }
+    const merged = new Map<string, ParsedRecord>();
+    for (const record of records) {
+      const key = `${record.workerId}:${record.date}`;
+      const previous = merged.get(key);
+      if (!previous) { merged.set(key, record); continue; }
+      const conflictingAllowance = previous.allowance > 0 && record.allowance > 0 && previous.allowance !== record.allowance;
+      if (conflictingAllowance) warnings.push(`${record.date}: أكثر من صرفة مختلفة للموظف نفسه؛ يرجى المراجعة`);
+      const attendance = previous.attendance === 'absent' || record.attendance === 'absent' ? 'absent' : previous.attendance === 'half' || record.attendance === 'half' ? 'half' : 'present';
+      const notes = [previous.note, record.note].filter(Boolean).filter((n, i, a) => a.indexOf(n) === i).join('، ');
+      merged.set(key, {
+        ...previous,
+        attendance,
+        allowance: previous.allowance || record.allowance,
+        advancePayment: previous.advancePayment + record.advancePayment,
+        delayMinutes: Math.max(previous.delayMinutes, record.delayMinutes),
+        note: notes,
+        confidence: Math.min(previous.confidence, record.confidence),
+        warning: [previous.warning, record.warning].filter(Boolean).join('، '),
+        duplicate: previous.duplicate || record.duplicate,
+      });
+    }
+    const uniqueRecords = [...merged.values()];
+    return res.status(200).json({ records: uniqueRecords, warnings, requiresReview: warnings.length > 0 || uniqueRecords.some(r => r.duplicate || r.confidence < 0.85), engine: 'fast-rules-v2' });
   } catch (error: any) {
     console.error('parse-attendance error', error);
     return res.status(500).json({ error: error?.message || 'تعذر تحليل الرسالة.' });

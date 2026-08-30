@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useStore } from '../hooks/useStore';
-import { User, Calendar as CalendarIcon, Printer, Edit2, X, Check } from 'lucide-react';
+import { User, Calendar as CalendarIcon, Printer, FileDown, Edit2, X, Check } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { format, parseISO } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { DailyRecord, AttendanceStatus } from '../types';
@@ -129,6 +131,24 @@ export default function Statements() {
     window.print();
   };
 
+  const handleExportPdf = async () => {
+    if (!printRef.current) return;
+    const canvas = await html2canvas(printRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imageWidth = pageWidth;
+    const imageHeight = (canvas.height * imageWidth) / canvas.width;
+    let offset = 0;
+    while (offset < imageHeight) {
+      if (offset > 0) pdf.addPage();
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, -offset, imageWidth, imageHeight, undefined, 'FAST');
+      offset += pageHeight;
+    }
+    const workerName = worker?.name?.replace(/\\s+/g, '-') || 'العامل';
+    pdf.save(`كشف-حساب-${workerName}.pdf`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
@@ -141,7 +161,14 @@ export default function Statements() {
               className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-xl shadow-sm hover:bg-indigo-700 focus:outline-none"
             >
               <Printer className="w-4 h-4 ml-2" />
-              طباعة / حفظ كـ PDF
+              طباعة
+            </button>
+            <button
+              onClick={handleExportPdf}
+              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-xl shadow-sm hover:bg-emerald-700 focus:outline-none"
+            >
+              <FileDown className="w-4 h-4 ml-2" />
+              تصدير PDF
             </button>
           </div>
         )}
@@ -256,7 +283,7 @@ export default function Statements() {
                                   </span>
                                 </td>
                                 <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-gray-900">
-                                  {r.allowance && r.allowance > 0 ? <span className="text-red-600 print:text-red-800">{(r.allowance || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
+                                  {r.allowance && r.allowance > 0 ? <span className={r.attendance === 'absent' ? 'text-red-600 print:text-red-800' : 'text-black print:text-black'}>{(r.allowance || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
                                 <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-gray-900">
                                   {r.advancePayment > 0 ? <span className="text-red-600 print:text-red-800">{(r.advancePayment || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
