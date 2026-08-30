@@ -29,7 +29,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({ title, dynamicData }
           <img 
             src={companyProfile.logo} 
             alt="شعار المنشأة" 
-            className="h-36 w-36 object-contain print:block print:max-h-36 print:max-w-36 drop-shadow-md"
+            className="report-logo h-36 w-36 object-contain print:block print:max-h-36 print:max-w-36 drop-shadow-md"
             style={{ display: 'block', visibility: 'visible', printColorAdjust: 'exact' }}
           />
         </div>

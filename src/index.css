@@ -36,6 +36,12 @@
     break-before: page !important;
   }
 
+  /* تكبير الشعار بصريًا داخل نفس الحيز دون زيادة ارتفاع الرأس أو دفع الجدول */
+  .report-logo {
+    transform: scale(1.22) !important;
+    transform-origin: center left !important;
+  }
+
   /* الجدول: العودة للعرض الطبيعي والواضح */
   table {
     width: 100% !important;
