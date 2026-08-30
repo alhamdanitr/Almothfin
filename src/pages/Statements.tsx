@@ -134,6 +134,12 @@ export default function Statements() {
 
   const handleExportPdf = async () => {
     if (!printRef.current) return;
+    // Chrome على Android يوفّر حفظًا موثوقًا عبر معاينة الطباعة، بينما html2canvas قد يفشل مع CSS الهاتف.
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    if (isAndroid) {
+      window.print();
+      return;
+    }
     try {
       if (document.fonts?.ready) await document.fonts.ready;
       const canvas = await html2canvas(printRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false });
@@ -151,7 +157,8 @@ export default function Statements() {
       pdf.save(`كشف-حساب-${workerName}.pdf`);
     } catch (error) {
       console.error('PDF export error:', error);
-      alert('تعذر إنشاء ملف PDF. استخدم زر الطباعة ثم اختر حفظ كـ PDF.');
+      // fallback موثوق بدل عرض رسالة فشل فقط.
+      window.print();
     }
   };
 

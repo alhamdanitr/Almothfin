@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useStore } from '../hooks/useStore';
 import { Save, Calendar, Bot, Wand2, Loader2, AlertCircle } from 'lucide-react';
 import { AttendanceStatus } from '../types';
@@ -25,6 +25,7 @@ export default function DailyEntry() {
     delayMinutes: string,
     note: string
   }>>({});
+  const pendingParsedEntries = useRef<typeof entries | null>(null);
 
   useEffect(() => {
     const initialEntries: typeof entries = {};
@@ -50,7 +51,12 @@ export default function DailyEntry() {
         };
       }
     });
-    setEntries(initialEntries);
+    if (pendingParsedEntries.current) {
+      setEntries(pendingParsedEntries.current);
+      pendingParsedEntries.current = null;
+    } else {
+      setEntries(initialEntries);
+    }
   }, [selectedDate, activeWorkers, records]);
 
   const hasExistingRecords = useMemo(() => {
@@ -79,8 +85,12 @@ export default function DailyEntry() {
         }
       });
       if (!data.records.length) throw new Error('لم يتم التعرف على سجل قابل للمراجعة.');
+      pendingParsedEntries.current = newEntries;
       if (newDate !== selectedDate) setSelectedDate(newDate);
-      setEntries(newEntries);
+      else {
+        setEntries(newEntries);
+        pendingParsedEntries.current = null;
+      }
       setAiText('');
     } catch (e: any) {
       setAiError(e.message);
