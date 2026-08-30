@@ -25,7 +25,8 @@ export default function Statements() {
     note: ''
   });
 
-  const worker = workers.find(w => w.id === selectedWorkerId);
+  const activeWorkers = useMemo(() => workers.filter(w => w.status !== 'inactive'), [workers]);
+  const worker = activeWorkers.find(w => w.id === selectedWorkerId);
 
   const openEditModal = (record: DailyRecord) => {
     setEditingRecord(record);
@@ -133,20 +134,25 @@ export default function Statements() {
 
   const handleExportPdf = async () => {
     if (!printRef.current) return;
-    const canvas = await html2canvas(printRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imageWidth = pageWidth;
-    const imageHeight = (canvas.height * imageWidth) / canvas.width;
-    let offset = 0;
-    while (offset < imageHeight) {
-      if (offset > 0) pdf.addPage();
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, -offset, imageWidth, imageHeight, undefined, 'FAST');
-      offset += pageHeight;
+    try {
+      if (document.fonts?.ready) await document.fonts.ready;
+      const canvas = await html2canvas(printRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imageWidth = pageWidth;
+      const imageHeight = (canvas.height * imageWidth) / canvas.width;
+      const imageData = canvas.toDataURL('image/jpeg', 0.92);
+      for (let offset = 0; offset < imageHeight; offset += pageHeight) {
+        if (offset > 0) pdf.addPage();
+        pdf.addImage(imageData, 'JPEG', 0, -offset, imageWidth, imageHeight, undefined, 'FAST');
+      }
+      const workerName = worker?.name?.replace(/\s+/g, '-') || 'العامل';
+      pdf.save(`كشف-حساب-${workerName}.pdf`);
+    } catch (error) {
+      console.error('PDF export error:', error);
+      alert('تعذر إنشاء ملف PDF. استخدم زر الطباعة ثم اختر حفظ كـ PDF.');
     }
-    const workerName = worker?.name?.replace(/\\s+/g, '-') || 'العامل';
-    pdf.save(`كشف-حساب-${workerName}.pdf`);
   };
 
   return (
@@ -186,7 +192,7 @@ export default function Statements() {
                 className="w-full pl-4 pr-10 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white appearance-none transition-colors"
               >
                 <option value="">-- اختر العامل --</option>
-                {workers.map(w => (
+                {activeWorkers.map(w => (
                   <option key={w.id} value={w.id}>{w.name} ({w.workerNumber})</option>
                 ))}
               </select>

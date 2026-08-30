@@ -202,8 +202,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     for (const record of newRecords) {
       const existing = records.find(r => r.workerId === record.workerId && r.date === record.date);
       if (existing) {
-        const ref = doc(db, 'records', existing.id);
-        batch.update(ref, record);
+        // لا تعدّل السجل الموجود تلقائيًا؛ التعديل يتم من شاشة الكشف فقط وبأمر صريح.
+        continue;
       } else {
         const id = crypto.randomUUID();
         const newRecord = { ...record, id };

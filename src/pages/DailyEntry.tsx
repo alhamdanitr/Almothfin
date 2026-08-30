@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../hooks/useStore';
 import { Save, Calendar, Bot, Wand2, Loader2, AlertCircle } from 'lucide-react';
 import { AttendanceStatus } from '../types';
+import { parseAttendanceText } from '../lib/fastAttendanceParser';
 
 export default function DailyEntry() {
   const { workers, records, addBulkRecords } = useStore();
@@ -62,46 +63,25 @@ export default function DailyEntry() {
     setIsAiParsing(true);
     setAiError('');
     try {
-      const response = await fetch('/api/parse-attendance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: aiText,
-          workers: activeWorkers,
-          fallbackDate: selectedDate
-        })
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'فشل الاتصال بالمساعد الذكي');
-      }
-      const data = await response.json();
-      
+      const data = parseAttendanceText(aiText, activeWorkers, records, selectedDate);
       const newEntries = { ...entries };
       let newDate = selectedDate;
-
-      if (data.records && Array.isArray(data.records)) {
-        data.records.forEach((record: any) => {
-          if (record.date) {
-              newDate = record.date;
-          }
-          if (record.workerId) {
-            newEntries[record.workerId] = {
-              attendance: record.attendance || 'full',
-              allowance: record.allowance !== undefined ? String(record.allowance) : (newEntries[record.workerId]?.allowance || ''),
-              advancePayment: record.advancePayment !== undefined ? String(record.advancePayment) : '',
-              delayMinutes: record.delayMinutes !== undefined ? String(record.delayMinutes) : '',
-              note: record.note || ''
-            };
-          }
-        });
-      }
-      
-      if (newDate !== selectedDate) {
-          setSelectedDate(newDate);
-      }
+      data.records.forEach((record) => {
+        newDate = record.date || newDate;
+        if (record.workerId) {
+          newEntries[record.workerId] = {
+            attendance: record.attendance,
+            allowance: String(record.allowance || ''),
+            advancePayment: String(record.advancePayment || ''),
+            delayMinutes: String(record.delayMinutes || ''),
+            note: record.note || ''
+          };
+        }
+      });
+      if (!data.records.length) throw new Error('لم يتم التعرف على سجل قابل للمراجعة.');
+      if (newDate !== selectedDate) setSelectedDate(newDate);
       setEntries(newEntries);
-      setAiText(''); // clear on success
+      setAiText('');
     } catch (e: any) {
       setAiError(e.message);
     } finally {

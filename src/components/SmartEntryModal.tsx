@@ -2,11 +2,10 @@ import { useMemo, useState } from 'react';
 import { Bot, X, Loader2, AlertCircle, Check, MessageSquare, ShieldAlert, RotateCcw } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { AttendanceStatus, DailyRecord } from '../types';
+import { parseAttendanceText } from '../lib/fastAttendanceParser';
 
 interface SmartEntryModalProps { onClose: () => void; }
 type ChatMessage = { role: 'user' | 'assistant'; text: string };
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://almothfin.vercel.app').replace(/\/$/, '');
-
 export function SmartEntryModal({ onClose }: SmartEntryModalProps) {
   const { workers, records, addBulkRecords } = useStore();
   const [text, setText] = useState('');
@@ -31,17 +30,12 @@ export function SmartEntryModal({ onClose }: SmartEntryModalProps) {
     const nextChat = [...chat, { role: 'user' as const, text: text.trim() }];
     saveChat(nextChat);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/parse-attendance`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, workers: activeWorkers, existingRecords: records, fallbackDate: new Date().toISOString().slice(0, 10) })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'فشل الاتصال بالمساعد الذكي');
-      const preview = (data.records || []).map((r: any) => ({ ...r, workerName: activeWorkers.find(w => w.id === r.workerId)?.name || 'غير معروف' }));
+      const data = parseAttendanceText(text, activeWorkers, records, new Date().toISOString().slice(0, 10));
+      const preview = data.records;
       if (!preview.length) throw new Error('لم يتم التعرف على أي سجل قابل للمراجعة.');
       setParsedRecords(preview);
-      setWarnings(data.warnings || []);
-      const summary = `تم تحليل ${preview.length} سجلًا. ${data.warnings?.length ? `يوجد ${data.warnings.length} تحذيرًا؛ لن تُحفظ السجلات المكررة أو غير الموثوقة.` : 'لا توجد تحذيرات.'}`;
+      setWarnings(data.warnings);
+      const summary = `تم التحليل محليًا خلال لحظة واحدة: ${preview.length} سجلًا. ${data.warnings.length ? `يوجد ${data.warnings.length} تحذيرًا؛ راجعها قبل الحفظ.` : 'لا توجد تحذيرات.'}`;
       saveChat([...nextChat, { role: 'assistant', text: summary }]);
       setText('');
     } catch (e: any) { setError(e.message || 'تعذر تحليل الرسالة.'); }
