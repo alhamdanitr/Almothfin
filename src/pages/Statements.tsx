@@ -400,6 +400,9 @@ export default function Statements() {
                   <p className="text-2xl font-bold mt-1 value print:text-black print:font-black">{(statementData.summary.netSalary || 0).toLocaleString()} ر.ي</p>
                 </div>
               </div>
+              <div className="mt-2 text-center text-[10px] text-gray-300 print:text-gray-400 select-none" dir="ltr">
+                برمجة كيان سوفت — www.kayan-soft.online
+              </div>
             </div>
           ))}
         </div>

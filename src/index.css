@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+:root, html, body { color-scheme: light; }
+html.dark { color-scheme: light; }
+
 @theme {
   --font-cairo: "Cairo", ui-sans-serif, system-ui, sans-serif;
 }

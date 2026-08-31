@@ -35,7 +35,7 @@ export function parseAttendanceText(text: string, workers: Worker[], existingRec
     if (!currentDate) { if (/\d/.test(latin(raw))) warnings.push(`تاريخ غير واضح للسطر: ${raw}`); continue; }
     const n = norm(raw), worker = workerCache.find(w => n.includes(norm(w.name)));
     if (!worker) { if (/\d/.test(latin(raw))) warnings.push(`اسم غير مطابق أو عامل غير مفعّل: ${raw}`); continue; }
-    const nums = [...latin(raw).matchAll(/[+]?(?:\d{1,3}(?:,\d{3})+|\d+)/g)].map(m => ({ start: m.index || 0, value: value(m[0]) })).filter(x => x.value >= 100);
+    const nums = [...latin(raw).matchAll(/[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)/g)].map(m => ({ start: m.index || 0, value: value(m[0]) })).filter(x => Math.abs(x.value) >= 100);
     const extraIndex = n.search(/اضافي|إضافي/);
     const extra = extraIndex >= 0 ? nums.find(x => Math.abs(x.start - extraIndex) <= 18) : undefined;
     const usable = extra ? nums.filter(x => x !== extra) : nums;

@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, CalendarPlus, FileSpreadsheet, FileText, Menu, X, Moon, Sun, Cloud, Check, RefreshCw, Download } from 'lucide-react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Users, CalendarPlus, FileSpreadsheet, FileText, Menu, X, Cloud, Check, RefreshCw, Download, Bot } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useStore } from '../hooks/useStore';
-import { SmartEntryModal } from './SmartEntryModal';
-import { Bot } from 'lucide-react';
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
   const [cloudModalOpen, setCloudModalOpen] = useState(false);
-  const [smartModalOpen, setSmartModalOpen] = useState(false);
   const [cloudUrl, setCloudUrl] = useState(localStorage.getItem('google_sheet_url') || 'https://script.google.com/macros/s/AKfycbwWkIwLCFG0cqNzOWzgmDb7qgpmURcoVyJNUbj1lXRR7LuLBTtf8hstrA0pA70XdlcC/exec');
   const [installPrompt, setInstallPrompt] = useState<any>(null);
 
   const { isSyncing, lastSyncTime, forceSync } = useStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: any) => {
@@ -38,14 +35,10 @@ export function Layout() {
     }
   };
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    if (!isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    localStorage.removeItem('theme');
+  }, []);
 
   const saveCloudSettings = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,10 +54,11 @@ export function Layout() {
     { name: 'الترحيل اليومي', path: '/daily-entry', icon: CalendarPlus },
     { name: 'الترحيل الجماعي', path: '/bulk-entry', icon: FileSpreadsheet },
     { name: 'كشوفات الحساب', path: '/statements', icon: FileText },
+    { name: 'مساعد الترحيل', path: '/smart-chat', icon: Bot },
   ];
 
   return (
-    <div className={cn("min-h-screen print:min-h-0 flex text-gray-900 bg-gray-50 print:block print:bg-white", isDark ? "dark:bg-slate-900 dark:text-slate-100" : "")} dir="rtl">
+    <div className="min-h-screen print:min-h-0 flex text-gray-900 bg-gray-50 print:block print:bg-white" dir="rtl">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
@@ -144,14 +138,7 @@ export function Layout() {
                 </button>
               )}
               <button 
-                onClick={toggleTheme}
-                className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-700 transition-colors"
-                title="تغيير المظهر"
-              >
-                {isDark ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-              <button 
-                onClick={() => setSmartModalOpen(true)}
+                onClick={() => navigate('/smart-chat')}
                 className="flex items-center px-3 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors shadow-sm"
               >
                 <Bot size={18} className="ml-2" />
@@ -197,8 +184,6 @@ export function Layout() {
 
       {/* Cloud Settings Modal */}
       
-      {smartModalOpen && <SmartEntryModal onClose={() => setSmartModalOpen(false)} />}
-
       {cloudModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
