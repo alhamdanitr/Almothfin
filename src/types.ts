@@ -1,10 +1,17 @@
 export type AttendanceStatus = 'full' | 'half' | 'absent';
 
+export interface SalaryChange {
+  effectiveDate: string; // YYYY-MM-DD
+  monthlySalary: number;
+  note?: string;
+}
+
 export interface Worker {
   id: string;
   workerNumber: string; // رقم العامل
   name: string; // اسم العامل
-  monthlySalary: number; // الراتب الشهري
+  monthlySalary: number; // الراتب الشهري الحالي
+  salaryHistory?: SalaryChange[]; // سجل الرواتب حسب تاريخ السريان
   dailyAllowance: number; // الصرفة اليومية المعتادة
   joinDate: string; // تاريخ الانضمام
   status?: 'active' | 'inactive'; // حالة العامل

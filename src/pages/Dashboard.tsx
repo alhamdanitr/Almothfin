@@ -4,6 +4,7 @@ import { Users, UserCheck, CreditCard, Wallet, TrendingUp, Edit2, X, Check } fro
 import { DailyRecord, AttendanceStatus } from '../types';
 import { SmartEntryModal } from '../components/SmartEntryModal';
 import { Bot } from 'lucide-react';
+import { getMonthlySalaryForDate } from '../lib/salaryHistory';
 
 export default function Dashboard() {
   const { workers, records, updateRecord } = useStore();
@@ -72,8 +73,8 @@ export default function Dashboard() {
       
       const worker = workers.find(w => w.id === r.workerId);
       if (worker) {
-        // Calculate daily rate
-        const dailyRate = (worker.monthlySalary || 0) / 30; // Assuming 30 days
+        // Calculate the daily rate that was active on this record's date.
+        const dailyRate = getMonthlySalaryForDate(worker, r.date) / 30;
         if (r.attendance === 'full') earnedSalaries += dailyRate;
         else if (r.attendance === 'half') earnedSalaries += (dailyRate / 2);
         

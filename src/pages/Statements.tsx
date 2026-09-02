@@ -7,6 +7,7 @@ import { format, parseISO } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { DailyRecord, AttendanceStatus } from '../types';
 import { ReportHeader } from '../components/ReportHeader';
+import { getMonthlySalaryForDate } from '../lib/salaryHistory';
 
 export default function Statements() {
   const { workers, records, updateRecord } = useStore();
@@ -87,12 +88,14 @@ export default function Statements() {
       let daysHalf = 0;
       let daysAbsent = 0;
 
-      const dailyRate = (worker.monthlySalary || 0) / 30;
+      let lastDailyRate = (worker.monthlySalary || 0) / 30;
 
       monthRecords.forEach(r => {
         totalAdvances += Number(r.advancePayment || 0);
         totalAllowance += Number(r.allowance || 0);
-        
+
+        const dailyRate = getMonthlySalaryForDate(worker, r.date) / 30;
+        lastDailyRate = dailyRate;
         const delayMins = Number(r.delayMinutes || 0);
         const discountAmount = (delayMins / 720) * dailyRate;
         totalDiscounts += discountAmount;
@@ -122,7 +125,7 @@ export default function Statements() {
           daysPresent,
           daysHalf,
           daysAbsent,
-          dailyRate: Math.round(dailyRate)
+          dailyRate: Math.round(lastDailyRate)
         }
       };
     });
