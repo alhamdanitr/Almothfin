@@ -279,6 +279,7 @@ export default function Statements() {
                         <tbody className="divide-y divide-gray-200 dark:divide-slate-700 print:divide-gray-200">
                           {statementData.records.map((r, i) => {
                             const dateObj = parseISO(r.date);
+                            const advancePayment = Number(r.advancePayment || 0);
                             return (
                               <tr key={r.id} className={`hover:bg-gray-50 dark:hover:bg-slate-700/50 print:hover:bg-transparent ${i % 2 === 0 ? 'print:bg-white' : 'print:bg-gray-50/50'}`}>
                                 <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-bold text-gray-900 dark:text-white print:text-gray-900">
@@ -299,7 +300,7 @@ export default function Statements() {
                                   {r.allowance && r.allowance > 0 ? <span className={r.attendance === 'absent' ? 'text-red-600 print:text-red-800' : 'text-black print:text-black'}>{(r.allowance || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
                                 <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-gray-900">
-                                  {r.advancePayment > 0 ? <span className="text-red-600 print:text-red-800">{(r.advancePayment || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
+                                  {advancePayment !== 0 ? <span className={advancePayment < 0 ? 'text-emerald-600 print:text-emerald-800' : 'text-red-600 print:text-red-800'}>{advancePayment.toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
                                 </td>
                                 <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-gray-900">
                                   {r.delayMinutes > 0 ? <span className="text-red-600 print:text-red-800">{(r.delayMinutes || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
@@ -324,6 +325,7 @@ export default function Statements() {
                     <div className="lg:hidden divide-y divide-gray-100 dark:divide-slate-700 print:hidden">
                       {statementData.records.map((r) => {
                         const dateObj = parseISO(r.date);
+                        const advancePayment = Number(r.advancePayment || 0);
                         return (
                           <div key={r.id} className="p-4 space-y-3">
                             <div className="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
@@ -352,8 +354,8 @@ export default function Statements() {
                               </div>
                               <div className="bg-gray-50 dark:bg-slate-900/50 p-2 rounded-lg text-center">
                                 <span className="block text-xs text-gray-500 dark:text-gray-400 mb-1">السحبيات</span>
-                                <span className={r.advancePayment > 0 ? "text-red-500 font-medium" : "text-gray-600 dark:text-gray-300"}>
-                                  {r.advancePayment > 0 ? r.advancePayment.toLocaleString() : '-'}
+                                <span className={advancePayment < 0 ? "text-emerald-600 font-medium" : advancePayment > 0 ? "text-red-500 font-medium" : "text-gray-600 dark:text-gray-300"}>
+                                  {advancePayment !== 0 ? advancePayment.toLocaleString() : '-'}
                                 </span>
                               </div>
                               <div className="bg-gray-50 dark:bg-slate-900/50 p-2 rounded-lg text-center">
