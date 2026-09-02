@@ -232,7 +232,6 @@ export default function DailyEntry() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <input
                         type="number"
-                        min="0"
                         placeholder="0"
                         value={entry.advancePayment}
                         onChange={(e) => handleEntryChange(worker.id, 'advancePayment', e.target.value)}
@@ -305,11 +304,10 @@ export default function DailyEntry() {
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">السحبيات (ر.ي)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      value={entry.advancePayment}
+<input
+                        type="number"
+                        placeholder="0"
+                        value={entry.advancePayment}
                       onChange={(e) => handleEntryChange(worker.id, 'advancePayment', e.target.value)}
                       className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white transition-colors text-sm"
                     />

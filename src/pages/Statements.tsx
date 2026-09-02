@@ -466,7 +466,6 @@ export default function Statements() {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">السحبيات (ر.ي)</label>
                   <input 
                     type="number"
-                    min="0"
                     value={formData.advancePayment}
                     onChange={(e) => setFormData({...formData, advancePayment: e.target.value})}
                     className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white"
