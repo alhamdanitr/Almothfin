@@ -38,6 +38,19 @@ export interface DailyRecord {
   note: string;
 }
 
+export type AdvanceDeductionMethod = 'automatic' | 'manual';
+
+export interface Advance {
+  id: string;
+  workerId: string;
+  amount: number;
+  paidAmount: number;
+  date: string;
+  note: string;
+  deductionMethod: AdvanceDeductionMethod;
+  status: 'active' | 'completed';
+}
+
 export interface DashboardStats {
   totalWorkers: number;
   presentToday: number;

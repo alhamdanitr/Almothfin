@@ -10,7 +10,7 @@ import { ReportHeader } from '../components/ReportHeader';
 import { getMonthlySalaryForDate } from '../lib/salaryHistory';
 
 export default function Statements() {
-  const { workers, records, updateRecord } = useStore();
+  const { workers, records, advances, updateRecord } = useStore();
   
   const [selectedWorkerId, setSelectedWorkerId] = useState<string>('');
   const [startDate, setStartDate] = useState<string>(format(new Date(), 'yyyy-MM-01'));
