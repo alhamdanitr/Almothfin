@@ -13,9 +13,9 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         includeAssets: ['icon-192.png', 'icon-512.png', 'screenshot-desktop.png', 'screenshot-mobile.png'],
         manifest: {
-          name: 'معمل هاشم الأحمدي للتطريز',
-          short_name: 'هاشم الأحمدي',
-          description: 'نظام إدارة العمال في معمل هاشم الأحمدي للتطريز الإلكتروني',
+          name: 'إدارة الموظفين',
+          short_name: 'إدارة الموظفين',
+          description: 'نظام إدارة العمال في إدارة الموظفين الإلكتروني',
           theme_color: '#4f46e5',
           background_color: '#ffffff',
           display: 'standalone',

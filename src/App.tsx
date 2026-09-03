@@ -12,6 +12,7 @@ import DailyEntry from './pages/DailyEntry';
 import BulkEntry from './pages/BulkEntry';
 import Statements from './pages/Statements';
 import SmartChat from './pages/SmartChat';
+import Settings from './pages/Settings';
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="bulk-entry" element={<BulkEntry />} />
             <Route path="statements" element={<Statements />} />
             <Route path="smart-chat" element={<SmartChat />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
         </Routes>
       </BrowserRouter>

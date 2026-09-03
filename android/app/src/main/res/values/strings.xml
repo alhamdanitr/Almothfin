@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">إدارة العمال</string>
-    <string name="title_activity_main">إدارة العمال</string>
-    <string name="package_name">com.almothfin.workers</string>
-    <string name="custom_url_scheme">com.almothfin.workers</string>
-</resources>

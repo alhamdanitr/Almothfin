@@ -168,20 +168,20 @@ export default function Statements() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">كشوفات الحساب</h2>
+        <h2 className="text-2xl font-bold text-text-main dark:text-white">كشوفات الحساب</h2>
         
         {statementDataByMonth && statementDataByMonth.length > 0 && (
           <div className="flex items-center space-x-2 space-x-reverse">
             <button 
               onClick={handlePrint}
-              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-xl shadow-sm hover:bg-indigo-700 focus:outline-none"
+              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-xl shadow-sm hover:bg-primary/90 focus:outline-none"
             >
               <Printer className="w-4 h-4 ml-2" />
               طباعة
             </button>
             <button
               onClick={handleExportPdf}
-              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-xl shadow-sm hover:bg-emerald-700 focus:outline-none"
+              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-success rounded-xl shadow-sm hover:bg-emerald-700 focus:outline-none"
             >
               <FileDown className="w-4 h-4 ml-2" />
               تصدير PDF
@@ -190,16 +190,16 @@ export default function Statements() {
         )}
       </div>
 
-      <div className="bg-white dark:bg-slate-800 shadow-sm rounded-2xl border border-gray-100 dark:border-slate-700 p-6 print:hidden">
+      <div className="bg-surface dark:bg-slate-800 shadow-sm rounded-2xl border border-border-main dark:border-slate-700 p-6 print:hidden">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">اختيار العامل</label>
+            <label className="block text-sm font-medium text-text-main dark:text-gray-300">اختيار العامل</label>
             <div className="relative">
-              <User className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <User className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
               <select 
                 value={selectedWorkerId}
                 onChange={(e) => setSelectedWorkerId(e.target.value)}
-                className="w-full pl-4 pr-10 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white appearance-none transition-colors"
+                className="w-full pl-4 pr-10 py-2.5 bg-brand-bg dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white appearance-none transition-colors"
               >
                 <option value="">-- اختر العامل --</option>
                 {activeWorkers.map(w => (
@@ -210,27 +210,27 @@ export default function Statements() {
           </div>
           
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">من تاريخ</label>
+            <label className="block text-sm font-medium text-text-main dark:text-gray-300">من تاريخ</label>
             <div className="relative">
-              <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
               <input 
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full pl-4 pr-10 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white transition-colors"
+                className="w-full pl-4 pr-10 py-2.5 bg-brand-bg dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white transition-colors"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">إلى تاريخ</label>
+            <label className="block text-sm font-medium text-text-main dark:text-gray-300">إلى تاريخ</label>
             <div className="relative">
-              <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
               <input 
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full pl-4 pr-10 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white transition-colors"
+                className="w-full pl-4 pr-10 py-2.5 bg-brand-bg dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white transition-colors"
               />
             </div>
           </div>
@@ -238,7 +238,7 @@ export default function Statements() {
       </div>
 
       {statementDataByMonth && statementDataByMonth.length > 0 ? (
-        <div ref={printRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 print:text-black print:bg-white" dir="rtl">
+        <div ref={printRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 print:text-black print:bg-surface" dir="rtl">
           {statementDataByMonth.map((statementData, index) => (
             <div 
               key={statementData.month} 
@@ -255,28 +255,28 @@ export default function Statements() {
               />
 
               {/* Details Table */}
-              <div className="bg-white dark:bg-slate-800 shadow-sm rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border-gray-300 print:rounded-lg print:mb-1 print:border-none">
-                <div className="px-4 py-3 print:hidden border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/20 flex justify-between items-center">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">تفاصيل الحركات اليومية ({statementData.month})</h3>
+              <div className="bg-surface dark:bg-slate-800 shadow-sm rounded-2xl border border-border-main dark:border-slate-700 overflow-hidden print:shadow-none print:border-border-main print:rounded-lg print:mb-1 print:border-none">
+                <div className="px-4 py-3 print:hidden border-b border-border-main dark:border-slate-700 bg-brand-bg/50 dark:bg-slate-900/20 flex justify-between items-center">
+                  <h3 className="font-semibold text-text-main dark:text-white">تفاصيل الحركات اليومية ({statementData.month})</h3>
                 </div>
                 {statementData.records.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500 dark:text-gray-400 print:text-gray-600 print:text-sm">
+                  <div className="p-8 text-center text-text-muted dark:text-text-muted print:text-text-muted print:text-sm">
                     لا توجد سجلات لهذا العامل في الشهر المحدد.
                   </div>
                 ) : (
                   <>
                     <div className="hidden lg:block overflow-x-auto print:block">
                       <table className="min-w-full text-right divide-y divide-gray-200 dark:divide-slate-700 print:divide-gray-300">
-                        <thead className="bg-gray-50 dark:bg-slate-900/50 print:bg-gray-100">
+                        <thead className="bg-brand-bg dark:bg-slate-900/50 print:bg-brand-bg hover:bg-brand-bg/80">
                           <tr>
-                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">التاريخ</th>
-                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">اليوم</th>
-                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الحضور</th>
-                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">الصرفة</th>
-                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">السحبيات</th>
-                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">التأخير</th>
-                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-gray-900 dark:text-gray-300 print:text-gray-900">ملاحظات</th>
-                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-gray-900 dark:text-gray-300 print:hidden">إجراءات</th>
+                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-text-main dark:text-gray-300 print:text-text-main">التاريخ</th>
+                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-text-main dark:text-gray-300 print:text-text-main">اليوم</th>
+                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-text-main dark:text-gray-300 print:text-text-main">الحضور</th>
+                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-text-main dark:text-gray-300 print:text-text-main">الصرفة</th>
+                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-text-main dark:text-gray-300 print:text-text-main">السحبيات</th>
+                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-text-main dark:text-gray-300 print:text-text-main">التأخير</th>
+                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-text-main dark:text-gray-300 print:text-text-main">ملاحظات</th>
+                            <th className="px-4 py-3 print:px-0.5 print:py-0.5 text-sm print:text-[9px] font-bold text-text-main dark:text-gray-300 print:hidden">إجراءات</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-slate-700 print:divide-gray-200">
@@ -284,35 +284,35 @@ export default function Statements() {
                             const dateObj = parseISO(r.date);
                             const advancePayment = Number(r.advancePayment || 0);
                             return (
-                              <tr key={r.id} className={`hover:bg-gray-50 dark:hover:bg-slate-700/50 print:hover:bg-transparent ${i % 2 === 0 ? 'print:bg-white' : 'print:bg-gray-50/50'}`}>
-                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-bold text-gray-900 dark:text-white print:text-gray-900">
+                              <tr key={r.id} className={`hover:bg-brand-bg dark:hover:bg-slate-700/50 print:hover:bg-transparent ${i % 2 === 0 ? 'print:bg-surface' : 'print:bg-brand-bg/50'}`}>
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-bold text-text-main dark:text-white print:text-text-main">
                                   {r.date}
                                 </td>
-                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] text-gray-600 dark:text-gray-400 print:text-gray-800">
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] text-text-muted dark:text-text-muted print:text-text-main">
                                   {format(dateObj, 'EEEE', { locale: ar })}
                                 </td>
                                 <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap">
                                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs print:text-[9.5px] print:px-1.5 print:py-0 font-black
-                                    ${r.attendance === 'full' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 print:bg-transparent print:text-emerald-800' : 
+                                    ${r.attendance === 'full' ? 'bg-emerald-100 text-emerald-800 dark:bg-success/20 dark:text-emerald-300 print:bg-transparent print:text-emerald-800' : 
                                       r.attendance === 'half' ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 print:bg-transparent print:text-amber-800' : 
-                                      'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300 print:bg-transparent print:text-red-800'}`}>
+                                      'bg-red-100 text-red-800 dark:bg-danger/20 dark:text-red-300 print:bg-transparent print:text-red-800'}`}>
                                     {r.attendance === 'full' ? 'حاضر' : r.attendance === 'half' ? 'نصف يوم' : 'غائب'}
                                   </span>
                                 </td>
-                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-gray-900">
-                                  {r.allowance && r.allowance > 0 ? <span className={r.attendance === 'absent' ? 'text-red-600 print:text-red-800' : 'text-black print:text-black'}>{(r.allowance || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-text-main">
+                                  {r.allowance && r.allowance > 0 ? <span className={r.attendance === 'absent' ? 'text-danger print:text-red-800' : 'text-black print:text-black'}>{(r.allowance || 0).toLocaleString()}</span> : <span className="text-text-muted print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-gray-900">
-                                  {advancePayment !== 0 ? <span className={advancePayment < 0 ? 'text-emerald-600 print:text-emerald-800' : 'text-red-600 print:text-red-800'}>{advancePayment.toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-text-main">
+                                  {advancePayment !== 0 ? <span className={advancePayment < 0 ? 'text-success print:text-emerald-800' : 'text-danger print:text-red-800'}>{advancePayment.toLocaleString()}</span> : <span className="text-text-muted print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-gray-900">
-                                  {r.delayMinutes > 0 ? <span className="text-red-600 print:text-red-800">{(r.delayMinutes || 0).toLocaleString()}</span> : <span className="text-gray-400 print:text-gray-300">-</span>}
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10.5px] font-black print:text-text-main">
+                                  {r.delayMinutes > 0 ? <span className="text-danger print:text-red-800">{(r.delayMinutes || 0).toLocaleString()}</span> : <span className="text-text-muted print:text-gray-300">-</span>}
                                 </td>
-                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10px] text-gray-500 dark:text-gray-400 print:text-gray-800 print:whitespace-normal break-words max-w-[120px] truncate print:max-w-none print:truncate-none">
+                                <td className="px-4 py-3 print:px-1 print:py-2 whitespace-nowrap text-sm print:text-[10px] text-text-muted dark:text-text-muted print:text-text-main print:whitespace-normal break-words max-w-[120px] truncate print:max-w-none print:truncate-none">
                                   {r.note || <span className="text-gray-300 print:text-gray-200">-</span>}
                                 </td>
                                 <td className="px-4 py-3 print:px-0.5 print:py-0 whitespace-nowrap text-sm print:hidden">
-                                  <button onClick={() => openEditModal(r)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors">
+                                  <button onClick={() => openEditModal(r)} className="text-primary hover:text-primary/80 dark:text-secondary dark:hover:text-primary/40 p-1.5 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/80/30 transition-colors">
                                     <Edit2 className="w-4 h-4" />
                                   </button>
                                 </td>
@@ -331,45 +331,45 @@ export default function Statements() {
                         const advancePayment = Number(r.advancePayment || 0);
                         return (
                           <div key={r.id} className="p-4 space-y-3">
-                            <div className="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                            <div className="flex justify-between items-center border-b border-border-main dark:border-slate-700 pb-2">
                               <div className="flex flex-col">
-                                <span className="font-bold text-gray-900 dark:text-white" dir="ltr">{r.date}</span>
-                                <span className="text-xs text-gray-500">{format(dateObj, 'EEEE', { locale: ar })}</span>
+                                <span className="font-bold text-text-main dark:text-white" dir="ltr">{r.date}</span>
+                                <span className="text-xs text-text-muted">{format(dateObj, 'EEEE', { locale: ar })}</span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    ${r.attendance === 'full' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300' : 
+                                    ${r.attendance === 'full' ? 'bg-emerald-100 text-emerald-800 dark:bg-success/20 dark:text-emerald-300' : 
                                       r.attendance === 'half' ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300' : 
-                                      'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300'}`}>
+                                      'bg-red-100 text-red-800 dark:bg-danger/20 dark:text-red-300'}`}>
                                     {r.attendance === 'full' ? 'حاضر' : r.attendance === 'half' ? 'نصف يوم' : 'غائب'}
                                 </span>
-                                <button onClick={() => openEditModal(r)} className="text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30 p-1 rounded transition-colors">
+                                <button onClick={() => openEditModal(r)} className="text-primary hover:bg-primary/10 dark:text-secondary dark:hover:bg-primary/80/30 p-1 rounded transition-colors">
                                   <Edit2 className="w-4 h-4" />
                                 </button>
                               </div>
                             </div>
                             <div className="grid grid-cols-3 gap-2 text-sm">
-                              <div className="bg-gray-50 dark:bg-slate-900/50 p-2 rounded-lg text-center">
-                                <span className="block text-xs text-gray-500 dark:text-gray-400 mb-1">الصرفة</span>
-                                <span className={r.allowance && r.allowance > 0 ? "text-red-500 font-medium" : "text-gray-600 dark:text-gray-300"}>
+                              <div className="bg-brand-bg dark:bg-slate-900/50 p-2 rounded-lg text-center">
+                                <span className="block text-xs text-text-muted dark:text-text-muted mb-1">الصرفة</span>
+                                <span className={r.allowance && r.allowance > 0 ? "text-danger font-medium" : "text-text-muted dark:text-gray-300"}>
                                   {r.allowance && r.allowance > 0 ? r.allowance.toLocaleString() : '-'}
                                 </span>
                               </div>
-                              <div className="bg-gray-50 dark:bg-slate-900/50 p-2 rounded-lg text-center">
-                                <span className="block text-xs text-gray-500 dark:text-gray-400 mb-1">السحبيات</span>
-                                <span className={advancePayment < 0 ? "text-emerald-600 font-medium" : advancePayment > 0 ? "text-red-500 font-medium" : "text-gray-600 dark:text-gray-300"}>
+                              <div className="bg-brand-bg dark:bg-slate-900/50 p-2 rounded-lg text-center">
+                                <span className="block text-xs text-text-muted dark:text-text-muted mb-1">السحبيات</span>
+                                <span className={advancePayment < 0 ? "text-success font-medium" : advancePayment > 0 ? "text-danger font-medium" : "text-text-muted dark:text-gray-300"}>
                                   {advancePayment !== 0 ? advancePayment.toLocaleString() : '-'}
                                 </span>
                               </div>
-                              <div className="bg-gray-50 dark:bg-slate-900/50 p-2 rounded-lg text-center">
-                                <span className="block text-xs text-gray-500 dark:text-gray-400 mb-1">التأخير (دقيقة)</span>
-                                <span className={r.delayMinutes > 0 ? "text-red-500 font-medium" : "text-gray-600 dark:text-gray-300"}>
+                              <div className="bg-brand-bg dark:bg-slate-900/50 p-2 rounded-lg text-center">
+                                <span className="block text-xs text-text-muted dark:text-text-muted mb-1">التأخير (دقيقة)</span>
+                                <span className={r.delayMinutes > 0 ? "text-danger font-medium" : "text-text-muted dark:text-gray-300"}>
                                   {r.delayMinutes > 0 ? r.delayMinutes.toLocaleString() : '-'}
                                 </span>
                               </div>
                             </div>
                             {r.note && (
-                              <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-900/30 p-2 rounded-lg">
+                              <div className="text-sm text-text-muted dark:text-text-muted bg-brand-bg dark:bg-slate-900/30 p-2 rounded-lg">
                                 <span className="font-medium mr-1">ملاحظة:</span> {r.note}
                               </div>
                             )}
@@ -383,36 +383,36 @@ export default function Statements() {
 
               {/* Summary Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 print-summary-grid mt-6 print:mt-1">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print-summary-card">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-900">الراتب المستحق</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white mt-1 value">{(statementData.summary.totalEarned || 0).toLocaleString()} ر.ي</p>
-                  <p className="text-xs text-gray-400 mt-1 print:block print:text-[8px] print:font-bold">({statementData.summary.daysPresent + (statementData.summary.daysHalf * 0.5)} يوم)</p>
+                <div className="bg-surface dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-border-main dark:border-slate-700 shadow-sm print-summary-card">
+                  <p className="text-sm text-text-muted dark:text-text-muted print:text-text-main">الراتب المستحق</p>
+                  <p className="text-xl font-bold text-text-main dark:text-white mt-1 value">{(statementData.summary.totalEarned || 0).toLocaleString()} ر.ي</p>
+                  <p className="text-xs text-text-muted mt-1 print:block print:text-[8px] print:font-bold">({statementData.summary.daysPresent + (statementData.summary.daysHalf * 0.5)} يوم)</p>
                 </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print-summary-card">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-900">إجمالي الصرفيات</p>
-                  <p className="text-xl font-bold text-red-500 mt-1 value print:text-red-700">{(statementData.summary.totalAllowance || 0).toLocaleString()} ر.ي</p>
+                <div className="bg-surface dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-border-main dark:border-slate-700 shadow-sm print-summary-card">
+                  <p className="text-sm text-text-muted dark:text-text-muted print:text-text-main">إجمالي الصرفيات</p>
+                  <p className="text-xl font-bold text-danger mt-1 value print:text-red-700">{(statementData.summary.totalAllowance || 0).toLocaleString()} ر.ي</p>
                 </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print-summary-card">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-900">إجمالي السحبيات</p>
-                  <p className="text-xl font-bold text-red-500 mt-1 value print:text-red-700">{(statementData.summary.totalAdvances || 0).toLocaleString()} ر.ي</p>
+                <div className="bg-surface dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-border-main dark:border-slate-700 shadow-sm print-summary-card">
+                  <p className="text-sm text-text-muted dark:text-text-muted print:text-text-main">إجمالي السحبيات</p>
+                  <p className="text-xl font-bold text-danger mt-1 value print:text-red-700">{(statementData.summary.totalAdvances || 0).toLocaleString()} ر.ي</p>
                 </div>
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-gray-100 dark:border-slate-700 shadow-sm print-summary-card">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-900">إجمالي الخصومات</p>
-                  <p className="text-xl font-bold text-red-500 mt-1 value print:text-red-700">{(statementData.summary.totalDiscounts || 0).toLocaleString()} ر.ي</p>
+                <div className="bg-surface dark:bg-slate-800 rounded-2xl p-4 lg:p-5 border border-border-main dark:border-slate-700 shadow-sm print-summary-card">
+                  <p className="text-sm text-text-muted dark:text-text-muted print:text-text-main">إجمالي الخصومات</p>
+                  <p className="text-xl font-bold text-danger mt-1 value print:text-red-700">{(statementData.summary.totalDiscounts || 0).toLocaleString()} ر.ي</p>
                 </div>
-                <div className="bg-indigo-600 rounded-2xl p-4 lg:p-5 shadow-sm text-white print-summary-card print:bg-white print:text-black print:border-2 print:border-black">
-                  <p className="text-indigo-100 text-sm print:text-black print:font-extrabold">الصافي المتبقي</p>
+                <div className="bg-primary rounded-2xl p-4 lg:p-5 shadow-sm text-white print-summary-card print:bg-surface print:text-black print:border-2 print:border-black">
+                  <p className="text-brand-bg text-sm print:text-black print:font-extrabold">الصافي المتبقي</p>
                   <p className="text-2xl font-bold mt-1 value print:text-black print:font-black">{(statementData.summary.netSalary || 0).toLocaleString()} ر.ي</p>
                 </div>
               </div>
-              <div className="mt-2 text-center text-[10px] text-gray-300 print:text-gray-400 select-none" dir="ltr">
+              <div className="mt-2 text-center text-[10px] text-gray-300 print:text-text-muted select-none" dir="ltr">
                 برمجة كيان سوفت — www.kayan-soft.online
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400 print:hidden">
+        <div className="text-center py-12 text-text-muted dark:text-text-muted print:hidden">
           {worker ? 'لا توجد سجلات لهذا العامل في الفترة المحددة' : 'يرجى تحديد العامل والفترة الزمنية لعرض كشف الحساب'}
         </div>
       )}
@@ -420,19 +420,19 @@ export default function Statements() {
       {/* Edit Record Modal */}
       {editingRecord && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="w-full max-w-md bg-surface dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between px-4 py-3 print:px-2 print:py-2 border-b dark:border-slate-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-bold text-text-main dark:text-white">
                 تعديل سجل {worker?.name}
               </h3>
-              <button onClick={closeEditModal} className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+              <button onClick={closeEditModal} className="text-text-muted hover:text-text-muted dark:hover:text-gray-300">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
             <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">حالة الحضور</label>
+                <label className="block text-sm font-medium text-text-main dark:text-gray-300">حالة الحضور</label>
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { value: 'full', label: 'حاضر', color: 'peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-700 dark:peer-checked:bg-emerald-900/30 dark:peer-checked:text-emerald-300 dark:peer-checked:border-emerald-500' },
@@ -448,7 +448,7 @@ export default function Statements() {
                         onChange={(e) => setFormData({...formData, attendance: e.target.value as AttendanceStatus})}
                         className="hidden peer" 
                       />
-                      <div className={`text-center py-2 border border-gray-200 dark:border-slate-700 rounded-xl transition-all ${opt.color} hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-400 text-sm font-medium`}>
+                      <div className={`text-center py-2 border border-border-main dark:border-slate-700 rounded-xl transition-all ${opt.color} hover:bg-brand-bg dark:hover:bg-slate-700 text-text-muted dark:text-text-muted text-sm font-medium`}>
                         {opt.label}
                       </div>
                     </label>
@@ -458,43 +458,43 @@ export default function Statements() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">الصرفة (ر.ي)</label>
+                  <label className="block text-sm font-medium text-text-main dark:text-gray-300">الصرفة (ر.ي)</label>
                   <input 
                     type="number"
                     min="0"
                     value={formData.allowance}
                     onChange={(e) => setFormData({...formData, allowance: e.target.value})}
-                    className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white"
+                    className="w-full px-4 py-2 bg-brand-bg dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">السحبيات (ر.ي)</label>
+                  <label className="block text-sm font-medium text-text-main dark:text-gray-300">السحبيات (ر.ي)</label>
                   <input 
                     type="number"
                     value={formData.advancePayment}
                     onChange={(e) => setFormData({...formData, advancePayment: e.target.value})}
-                    className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white"
+                    className="w-full px-4 py-2 bg-brand-bg dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">التأخير (دقيقة)</label>
+                  <label className="block text-sm font-medium text-text-main dark:text-gray-300">التأخير (دقيقة)</label>
                   <input 
                     type="number"
                     min="0"
                     value={formData.delayMinutes}
                     onChange={(e) => setFormData({...formData, delayMinutes: e.target.value})}
-                    className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white"
+                    className="w-full px-4 py-2 bg-brand-bg dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ملاحظات</label>
+                <label className="block text-sm font-medium text-text-main dark:text-gray-300">ملاحظات</label>
                 <textarea 
                   rows={2}
                   value={formData.note}
                   onChange={(e) => setFormData({...formData, note: e.target.value})}
-                  className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white resize-none"
+                  className="w-full px-4 py-2 bg-brand-bg dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white resize-none"
                 ></textarea>
               </div>
 
@@ -502,13 +502,13 @@ export default function Statements() {
                 <button
                   type="button"
                   onClick={closeEditModal}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700"
+                  className="px-4 py-2 text-sm font-medium text-text-main dark:text-gray-300 bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-600 rounded-lg hover:bg-brand-bg dark:hover:bg-slate-700"
                 >
                   إلغاء
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 flex items-center"
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 flex items-center"
                 >
                   <Check className="w-4 h-4 ml-2" />
                   حفظ التعديلات

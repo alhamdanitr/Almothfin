@@ -1,5 +1,15 @@
 export type AttendanceStatus = 'full' | 'half' | 'absent';
 
+export interface Company {
+  id: string;
+  name: string;
+  description?: string;
+  logoBase64?: string;
+  phones?: string;
+  address?: string;
+  createdAt: number;
+}
+
 export interface SalaryChange {
   effectiveDate: string; // YYYY-MM-DD
   monthlySalary: number;

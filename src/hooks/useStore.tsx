@@ -1,45 +1,84 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { Worker, DailyRecord } from '../types';
-import { collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, getDocs, writeBatch } from 'firebase/firestore';
+import { Worker, DailyRecord, Company } from '../types';
+import { collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, getDocs, writeBatch, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 interface StoreContextType {
+  companies: Company[];
+  activeCompanyId: string | null;
+  activeCompany: Company | null;
   workers: Worker[];
   records: DailyRecord[];
-  addWorker: (worker: Omit<Worker, 'id'>) => void;
-  updateWorker: (id: string, worker: Partial<Worker>) => void;
-  deleteWorker: (id: string) => void;
-  addRecord: (record: Omit<DailyRecord, 'id'>) => void;
-  addBulkRecords: (records: Omit<DailyRecord, 'id'>[]) => void;
-  deleteRecord: (id: string) => void;
-  updateRecord: (id: string, record: Partial<DailyRecord>) => void;
+  
+  addCompany: (company: Omit<Company, 'id' | 'createdAt'>) => Promise<void>;
+  updateCompany: (id: string, company: Partial<Company>) => Promise<void>;
+  switchCompany: (id: string) => void;
+  deleteCompany: (id: string) => Promise<void>;
+
+  addWorker: (worker: Omit<Worker, 'id'>) => Promise<void>;
+  updateWorker: (id: string, worker: Partial<Worker>) => Promise<void>;
+  deleteWorker: (id: string) => Promise<void>;
+  
+  addRecord: (record: Omit<DailyRecord, 'id'>) => Promise<void>;
+  addBulkRecords: (records: Omit<DailyRecord, 'id'>[]) => Promise<void>;
+  deleteRecord: (id: string) => Promise<void>;
+  updateRecord: (id: string, record: Partial<DailyRecord>) => Promise<void>;
+  
   isSyncing: boolean;
   lastSyncTime: string | null;
-  forceSync: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-const DEFAULT_SYNC_URL = "https://script.google.com/macros/s/AKfycbwWkIwLCFG0cqNzOWzgmDb7qgpmURcoVyJNUbj1lXRR7LuLBTtf8hstrA0pA70XdlcC/exec";
-
 export function StoreProvider({ children }: { children: React.ReactNode }) {
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [activeCompanyId, setActiveCompanyId] = useState<string | null>(localStorage.getItem('activeCompanyId'));
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [records, setRecords] = useState<DailyRecord[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
-  
-  const isInitialLoad = useRef(true);
+
+  const activeCompany = companies.find(c => c.id === activeCompanyId) || null;
 
   useEffect(() => {
-    // Listen to workers collection
-    const unsubscribeWorkers = onSnapshot(collection(db, 'workers'), (snapshot) => {
+    // Listen to companies collection
+    const q = query(collection(db, 'companies'), orderBy('createdAt', 'asc'));
+    const unsubscribeCompanies = onSnapshot(q, (snapshot) => {
+      const compsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Company));
+      setCompanies(compsData);
+      
+      // If no active company, default to first or 'default'
+      if (compsData.length > 0 && !localStorage.getItem('activeCompanyId')) {
+        const defaultId = compsData.find(c => c.id === 'default')?.id || compsData[0].id;
+        setActiveCompanyId(defaultId);
+        localStorage.setItem('activeCompanyId', defaultId);
+      }
+    });
+
+    return () => unsubscribeCompanies();
+  }, []);
+
+  useEffect(() => {
+    if (!activeCompanyId) {
+      setWorkers([]);
+      setRecords([]);
+      return;
+    }
+
+    setWorkers([]);
+    setRecords([]);
+
+    // Listen to workers and records for active company
+    const workersRef = collection(db, 'companies', activeCompanyId, 'workers');
+    const recordsRef = collection(db, 'companies', activeCompanyId, 'records');
+
+    const unsubscribeWorkers = onSnapshot(workersRef, (snapshot) => {
       const workersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Worker));
       setWorkers(workersData);
       setLastSyncTime(new Date().toLocaleTimeString('ar-IQ'));
     });
 
-    // Listen to records collection
-    const unsubscribeRecords = onSnapshot(collection(db, 'records'), (snapshot) => {
+    const unsubscribeRecords = onSnapshot(recordsRef, (snapshot) => {
       const recordsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DailyRecord));
       setRecords(recordsData);
       setLastSyncTime(new Date().toLocaleTimeString('ar-IQ'));
@@ -49,194 +88,96 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       unsubscribeWorkers();
       unsubscribeRecords();
     };
-  }, []);
+  }, [activeCompanyId]);
 
-  const forceSync = async () => {
-    setIsSyncing(true);
-    // If the database records are empty, we will try to migrate data from old Google Sheet
-    try {
-      const recordsSnap = await getDocs(collection(db, 'records'));
-      if (recordsSnap.empty) {
-        console.log("Firestore records empty, migrating from old Google Script...");
-        const response = await fetch(`${DEFAULT_SYNC_URL}?action=getInitialData&startDate=2024-01-01&endDate=2030-12-31`);
-        if (response.ok) {
-          const data = await response.json();
-          
-          let mappedWorkers: Worker[] = [];
+  const switchCompany = (id: string) => {
+    setActiveCompanyId(id);
+    localStorage.setItem('activeCompanyId', id);
+  };
 
-          if (data.employees && Array.isArray(data.employees)) {
-            // First check existing workers to avoid duplicates if some exist
-            const workersSnap = await getDocs(collection(db, 'workers'));
-            const existingWorkers = workersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Worker));
-            
-            mappedWorkers = data.employees.map((emp: any) => {
-              const existing = existingWorkers.find(w => w.name === emp.name);
-              if (existing) return existing;
-              
-              return {
-                id: emp.id || crypto.randomUUID(),
-                workerNumber: emp.id ? String(emp.id) : '',
-                name: emp.name || '',
-                monthlySalary: Number(emp.salary) || 0,
-                dailyAllowance: Number(emp.fixedDeparture) || 0,
-                joinDate: emp.hireDate || new Date().toISOString().split('T')[0],
-                status: 'active'
-              };
-            });
-            
-            // Chunk workers write (though usually small enough)
-            for (let i = 0; i < mappedWorkers.length; i += 400) {
-              const batch = writeBatch(db);
-              const chunk = mappedWorkers.slice(i, i + 400);
-              for (const worker of chunk) {
-                if (!existingWorkers.find(w => w.id === worker.id)) {
-                  const workerRef = doc(collection(db, 'workers'), worker.id);
-                  batch.set(workerRef, worker);
-                }
-              }
-              await batch.commit();
-            }
-          }
+  const addCompany = async (company: Omit<Company, 'id' | 'createdAt'>) => {
+    const id = crypto.randomUUID();
+    const newCompany: Company = { ...company, id, createdAt: Date.now() };
+    await setDoc(doc(db, 'companies', id), newCompany);
+    switchCompany(id);
+  };
 
-          if (data.allEntries && Array.isArray(data.allEntries)) {
-            const mappedRecords: DailyRecord[] = data.allEntries.map((rec: any) => {
-              const worker = mappedWorkers.find(w => w.name === rec.employeeName);
-              const workerId = worker ? worker.id : crypto.randomUUID();
-              
-              let attendance: 'full' | 'half' | 'absent' = 'full';
-              if (rec.attendance === 'نصف') attendance = 'half';
-              if (rec.attendance === 'غياب') attendance = 'absent';
-              
-              const delayMinutes = rec.overtime < 0 ? Math.abs(rec.overtime) : 0;
-              const advancePayment = Number(rec.advance) || 0;
-              const allowance = Number(rec.departure) || 0;
-              
-              let date = rec.date;
-              if (date && date.includes('/')) {
-                  const parts = date.split('/');
-                  if (parts.length === 3) {
-                      date = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-                  }
-              } else if (!date || !date.includes('-')) {
-                  date = new Date().toISOString().split('T')[0];
-              }
-              
-              const recordId = crypto.randomUUID();
-              return {
-                id: recordId,
-                workerId,
-                date: date,
-                attendance,
-                allowance,
-                advancePayment,
-                delayMinutes,
-                note: rec.note || ''
-              };
-            });
-            
-            // Chunk records into batches of 400
-            for (let i = 0; i < mappedRecords.length; i += 400) {
-              const batch = writeBatch(db);
-              const chunk = mappedRecords.slice(i, i + 400);
-              for (const record of chunk) {
-                const recordRef = doc(collection(db, 'records'), record.id);
-                batch.set(recordRef, record);
-              }
-              await batch.commit();
-            }
-          }
-          console.log("Migration successful");
-        }
+  const updateCompany = async (id: string, updated: Partial<Company>) => {
+    await updateDoc(doc(db, 'companies', id), updated);
+  };
+
+  const deleteCompany = async (id: string) => {
+    await deleteDoc(doc(db, 'companies', id));
+    if (activeCompanyId === id) {
+      const newActive = companies.find(c => c.id !== id)?.id || null;
+      if (newActive) {
+        switchCompany(newActive);
+      } else {
+        setActiveCompanyId(null);
+        localStorage.removeItem('activeCompanyId');
       }
-    } catch (e) {
-      console.warn("Migration failed", e);
-    } finally {
-      setIsSyncing(false);
     }
   };
 
-  useEffect(() => {
-    // Only run forceSync on mount
-    forceSync();
-  }, []);
-
   const addWorker = async (worker: Omit<Worker, 'id'>) => {
+    if (!activeCompanyId) return;
     const id = crypto.randomUUID();
     const newWorker = { ...worker, id };
-    // Optimistic update
-    setWorkers(prev => [...prev, newWorker]);
-    await setDoc(doc(db, 'workers', id), newWorker);
+    await setDoc(doc(db, 'companies', activeCompanyId, 'workers', id), newWorker);
   };
 
   const updateWorker = async (id: string, updated: Partial<Worker>) => {
-    // Optimistic update
-    setWorkers(prev => prev.map(w => w.id === id ? { ...w, ...updated } : w));
-    try { await updateDoc(doc(db, 'workers', id), updated); } catch(e) { console.error('Worker Update Error:', e, updated); }
+    if (!activeCompanyId) return;
+    try { await updateDoc(doc(db, 'companies', activeCompanyId, 'workers', id), updated); } catch(e) { console.error(e); }
   };
 
   const deleteWorker = async (id: string) => {
-    // Optimistic update
-    setWorkers(prev => prev.filter(w => w.id !== id));
-    await deleteDoc(doc(db, 'workers', id));
+    if (!activeCompanyId) return;
+    await deleteDoc(doc(db, 'companies', activeCompanyId, 'workers', id));
   };
 
   const addRecord = async (record: Omit<DailyRecord, 'id'>) => {
-    // Check if record for same worker and date exists
+    if (!activeCompanyId) return;
     const existing = records.find(r => r.workerId === record.workerId && r.date === record.date);
     if (existing) {
       await updateRecord(existing.id, record);
       return;
     }
-    
     const id = crypto.randomUUID();
     const newRecord = { ...record, id };
-    // Optimistic update
-    setRecords(prev => [...prev, newRecord]);
-    await setDoc(doc(db, 'records', id), newRecord);
+    await setDoc(doc(db, 'companies', activeCompanyId, 'records', id), newRecord);
   };
 
   const addBulkRecords = async (newRecords: Omit<DailyRecord, 'id'>[]) => {
+    if (!activeCompanyId) return;
     const batch = writeBatch(db);
-    const addedRecords = [];
-    
     for (const record of newRecords) {
       const existing = records.find(r => r.workerId === record.workerId && r.date === record.date);
-      if (existing) {
-        // لا تعدّل السجل الموجود تلقائيًا؛ التعديل يتم من شاشة الكشف فقط وبأمر صريح.
-        continue;
-      } else {
+      if (!existing) {
         const id = crypto.randomUUID();
         const newRecord = { ...record, id };
-        addedRecords.push(newRecord);
-        const ref = doc(db, 'records', id);
+        const ref = doc(db, 'companies', activeCompanyId, 'records', id);
         batch.set(ref, newRecord);
       }
     }
-    
-    // Optimistic update
-    if (addedRecords.length > 0) {
-      setRecords(prev => [...prev, ...addedRecords]);
-    }
-    
     await batch.commit();
   };
 
   const deleteRecord = async (id: string) => {
-    // Optimistic update
-    setRecords(prev => prev.filter(r => r.id !== id));
-    await deleteDoc(doc(db, 'records', id));
+    if (!activeCompanyId) return;
+    await deleteDoc(doc(db, 'companies', activeCompanyId, 'records', id));
   };
 
   const updateRecord = async (id: string, updated: Partial<DailyRecord>) => {
-    // Optimistic update
-    setRecords(prev => prev.map(r => r.id === id ? { ...r, ...updated } : r));
-    try { await updateDoc(doc(db, 'records', id), updated); } catch(e) { console.error('Record Update Error:', e, updated); }
+    if (!activeCompanyId) return;
+    try { await updateDoc(doc(db, 'companies', activeCompanyId, 'records', id), updated); } catch(e) { console.error(e); }
   };
 
   return (
     <StoreContext.Provider value={{
+      companies, activeCompanyId, activeCompany, addCompany, updateCompany, switchCompany, deleteCompany,
       workers, records, addWorker, updateWorker, deleteWorker, addRecord, addBulkRecords, deleteRecord, updateRecord,
-      isSyncing, lastSyncTime, forceSync
+      isSyncing, lastSyncTime
     }}>
       {children}
     </StoreContext.Provider>

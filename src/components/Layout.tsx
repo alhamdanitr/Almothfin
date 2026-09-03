@@ -1,52 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, CalendarPlus, FileSpreadsheet, FileText, Menu, X, Cloud, Check, RefreshCw, Download, Bot } from 'lucide-react';
+import { LayoutDashboard, Users, CalendarPlus, FileSpreadsheet, FileText, Menu, X, Check, Bot, Settings, Building2, ChevronDown, WifiOff } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useStore } from '../hooks/useStore';
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [cloudModalOpen, setCloudModalOpen] = useState(false);
-  const [cloudUrl, setCloudUrl] = useState(localStorage.getItem('google_sheet_url') || 'https://script.google.com/macros/s/AKfycbwWkIwLCFG0cqNzOWzgmDb7qgpmURcoVyJNUbj1lXRR7LuLBTtf8hstrA0pA70XdlcC/exec');
-  const [installPrompt, setInstallPrompt] = useState<any>(null);
-
-  const { isSyncing, lastSyncTime, forceSync } = useStore();
+  const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  const { isSyncing, lastSyncTime, companies, activeCompanyId, activeCompany, switchCompany } = useStore();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setInstallPrompt(null);
-    }
-  };
 
   useEffect(() => {
     document.documentElement.classList.remove('dark');
     localStorage.removeItem('theme');
+    
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
-  const saveCloudSettings = (e: React.FormEvent) => {
-    e.preventDefault();
-    localStorage.setItem('google_sheet_url', cloudUrl);
-    setCloudModalOpen(false);
-    forceSync();
-    alert('تم حفظ إعدادات الربط السحابي ومزامنة البيانات بنجاح!');
-  };
 
   const navItems = [
     { name: 'لوحة التحكم', path: '/', icon: LayoutDashboard },
@@ -54,11 +35,12 @@ export function Layout() {
     { name: 'الترحيل اليومي', path: '/daily-entry', icon: CalendarPlus },
     { name: 'الترحيل الجماعي', path: '/bulk-entry', icon: FileSpreadsheet },
     { name: 'كشوفات الحساب', path: '/statements', icon: FileText },
-    { name: 'مساعد الترحيل', path: '/smart-chat', icon: Bot },
+    { name: 'المساعد الذكي', path: '/smart-chat', icon: Bot },
+    { name: 'الإعدادات والمؤسسات', path: '/settings', icon: Settings },
   ];
 
   return (
-    <div className="min-h-screen print:min-h-0 flex text-gray-900 bg-gray-50 print:block print:bg-white" dir="rtl">
+    <div className="min-h-screen print:min-h-0 flex text-text-main bg-brand-bg print:block print:bg-surface" dir="rtl">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
@@ -69,17 +51,53 @@ export function Layout() {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 right-0 z-50 w-64 bg-white dark:bg-slate-800 shadow-xl transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 print:hidden",
+        "fixed inset-y-0 right-0 z-50 w-64 bg-surface dark:bg-slate-800 shadow-xl transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 print:hidden flex flex-col",
         sidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
       )}>
         <div className="flex items-center justify-between h-16 px-6 border-b dark:border-slate-700">
-          <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">معمل هاشم الأحمدي</span>
-          <button className="lg:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" onClick={() => setSidebarOpen(false)}>
+          <span className="text-xl font-bold text-primary dark:text-secondary truncate pr-2">
+            {activeCompany?.name || 'النظام الإداري'}
+          </span>
+          <button className="lg:hidden text-text-muted hover:text-text-main dark:text-text-muted dark:hover:text-gray-200" onClick={() => setSidebarOpen(false)}>
             <X size={24} />
           </button>
         </div>
         
-        <nav className="p-4 space-y-1">
+        <div className="p-4 border-b border-border-main relative">
+           <button 
+             onClick={() => setCompanyDropdownOpen(!companyDropdownOpen)}
+             className="w-full flex items-center justify-between bg-brand-bg hover:bg-brand-bg/80 px-3 py-2 rounded-lg border border-border-main transition-colors"
+           >
+             <div className="flex items-center space-x-2 space-x-reverse overflow-hidden">
+               <Building2 className="w-5 h-5 text-text-muted flex-shrink-0" />
+               <span className="text-sm font-bold text-text-main truncate">{activeCompany?.name || 'اختر المؤسسة'}</span>
+             </div>
+             <ChevronDown className="w-4 h-4 text-text-muted flex-shrink-0" />
+           </button>
+           
+           {companyDropdownOpen && (
+             <div className="absolute top-full left-4 right-4 mt-1 bg-surface border border-border-main shadow-lg rounded-xl overflow-hidden z-50 py-1">
+               <div className="max-h-48 overflow-y-auto">
+                 {companies.map(c => (
+                   <button
+                     key={c.id}
+                     onClick={() => { switchCompany(c.id); setCompanyDropdownOpen(false); }}
+                     className={cn("w-full text-right px-4 py-2 text-sm hover:bg-primary/10 transition-colors", activeCompanyId === c.id ? "bg-primary/10 text-primary font-bold" : "text-text-main")}
+                   >
+                     {c.name}
+                   </button>
+                 ))}
+               </div>
+               <div className="border-t border-border-main pt-1 mt-1">
+                 <button onClick={() => { navigate('/settings'); setCompanyDropdownOpen(false); }} className="w-full text-right px-4 py-2 text-sm text-primary hover:bg-primary/10 font-medium flex items-center">
+                   <Settings className="w-4 h-4 ml-2" /> إدارة المؤسسات
+                 </button>
+               </div>
+             </div>
+           )}
+        </div>
+
+        <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -88,8 +106,8 @@ export function Layout() {
               className={({ isActive }) => cn(
                 "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
                 isActive 
-                  ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400" 
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-700/50 dark:hover:text-gray-100"
+                  ? "bg-primary/10 text-primary dark:bg-secondary/10 dark:text-secondary" 
+                  : "text-text-muted hover:bg-brand-bg/80 hover:text-text-main dark:text-text-muted dark:hover:bg-slate-700/50 dark:hover:text-gray-100"
               )}
             >
               <item.icon className="w-5 h-5 ml-3" />
@@ -100,79 +118,57 @@ export function Layout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen print:min-h-0 overflow-hidden print:overflow-visible print:block">
+      <div className="flex-1 flex flex-col min-h-screen print:min-h-0 overflow-hidden print:overflow-visible print:block w-full">
         {/* Header */}
-        <header className="flex items-center justify-between h-16 px-4 bg-white dark:bg-slate-800 shadow-sm sm:px-6 lg:px-8 print:hidden">
+        <header className="flex items-center justify-between h-16 px-4 bg-surface dark:bg-slate-800 shadow-sm sm:px-6 lg:px-8 print:hidden">
           <button 
-            className="p-2 -mr-2 text-gray-500 rounded-md lg:hidden hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-slate-700 dark:text-gray-400"
+            className="p-2 -mr-2 text-text-muted rounded-md lg:hidden hover:text-text-main hover:bg-brand-bg/80 dark:hover:bg-slate-700 dark:text-text-muted"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu size={24} />
           </button>
           
           <div className="flex items-center flex-1 lg:justify-end justify-between">
-            <h1 className="text-lg font-semibold lg:hidden">نظام إدارة العمال</h1>
+            <h1 className="text-lg font-semibold lg:hidden truncate ml-4">{activeCompany?.name || 'النظام الإداري'}</h1>
             <div className="flex items-center space-x-2 space-x-reverse">
-              <div className="hidden sm:flex items-center text-xs text-gray-500 dark:text-gray-400 mx-2">
-                {isSyncing ? (
-                  <span className="flex items-center text-indigo-600 dark:text-indigo-400">
-                    <RefreshCw className="w-3 h-3 ml-1 animate-spin" />
-                    جاري المزامنة...
-                  </span>
-                ) : lastSyncTime ? (
-                  <span className="flex items-center text-emerald-600 dark:text-emerald-400">
+              {!isOnline && (
+                <div className="flex items-center text-xs text-danger font-medium mx-2 bg-danger/10 px-2 py-1 rounded-full">
+                  <WifiOff className="w-3 h-3 ml-1" />
+                  وضع عدم الاتصال
+                </div>
+              )}
+              <div className="hidden sm:flex items-center text-xs text-text-muted dark:text-text-muted mx-2">
+                {lastSyncTime ? (
+                  <span className="flex items-center text-success dark:text-success">
                     <Check className="w-3 h-3 ml-1" />
                     متزامن ({lastSyncTime})
                   </span>
                 ) : (
-                  <span>غير متصل بالسحابة</span>
+                  <span>جاري المزامنة...</span>
                 )}
               </div>
-              {installPrompt && (
-                <button 
-                  onClick={handleInstallClick}
-                  className="flex items-center px-3 py-2 text-sm font-medium text-emerald-700 bg-emerald-100 rounded-lg hover:bg-emerald-200 transition-colors shadow-sm dark:bg-emerald-500/20 dark:text-emerald-400"
-                >
-                  <Download size={18} className="ml-2" />
-                  <span className="hidden sm:inline">تثبيت التطبيق</span>
-                </button>
-              )}
-              <button 
-                onClick={() => navigate('/smart-chat')}
-                className="flex items-center px-3 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors shadow-sm"
-              >
-                <Bot size={18} className="ml-2" />
-                <span className="hidden sm:inline">المساعد الذكي</span>
-              </button>
-              <button 
-                onClick={() => setCloudModalOpen(true)}
-                className="flex items-center px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 dark:text-indigo-400 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors shadow-sm"
-              >
-                <Cloud size={18} className="ml-2" />
-                <span className="hidden sm:inline">الربط السحابي</span>
-              </button>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto print:overflow-visible p-4 sm:p-6 lg:p-8 pb-20 lg:pb-8 print:p-0 print:pb-0">
+        <main className="flex-1 overflow-auto print:overflow-visible p-4 sm:p-6 lg:p-8 pb-20 lg:pb-8 print:p-0 print:pb-0 relative z-0">
           <Outlet />
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden print:hidden fixed bottom-0 left-0 right-0 w-full bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe">
-        <div className="flex items-center justify-between h-16 px-1">
-          {navItems.map((item) => (
+      <nav className="lg:hidden print:hidden fixed bottom-0 left-0 right-0 w-full bg-surface dark:bg-slate-800 border-t border-border-main dark:border-slate-700 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe">
+        <div className="flex items-center justify-between h-16 px-1 overflow-x-auto">
+          {navItems.slice(0, 5).map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) => cn(
-                "flex flex-col items-center justify-center flex-1 h-full min-w-0 transition-colors",
+                "flex flex-col items-center justify-center flex-1 h-full min-w-16 transition-colors",
                 isActive 
-                  ? "text-indigo-600 dark:text-indigo-400" 
-                  : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                  ? "text-primary dark:text-secondary" 
+                  : "text-text-muted hover:text-text-main dark:text-text-muted dark:hover:text-gray-100"
               )}
             >
               <item.icon className="w-5 h-5 mb-1 flex-shrink-0" />
@@ -181,58 +177,6 @@ export function Layout() {
           ))}
         </div>
       </nav>
-
-      {/* Cloud Settings Modal */}
-      
-      {cloudModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b dark:border-slate-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-                <Cloud className="w-5 h-5 ml-2 text-indigo-500" />
-                إعدادات الربط السحابي
-              </h3>
-              <button onClick={() => setCloudModalOpen(false)} className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <form onSubmit={saveCloudSettings} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">رابط Google Sheets Web App</label>
-                <input
-                  type="url"
-                  value={cloudUrl}
-                  onChange={(e) => setCloudUrl(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white text-left"
-                  placeholder="https://script.google.com/macros/s/..."
-                  dir="ltr"
-                />
-                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  قم بلصق رابط التطبيق الخاص بك لربط النظام بقاعدة بيانات Google Sheets بشكل مباشر.
-                </p>
-              </div>
-
-              <div className="pt-4 flex items-center justify-end space-x-3 space-x-reverse">
-                <button
-                  type="button"
-                  onClick={() => setCloudModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none"
-                >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 focus:outline-none flex items-center"
-                >
-                  <Check className="w-4 h-4 ml-2" />
-                  حفظ الإعدادات
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

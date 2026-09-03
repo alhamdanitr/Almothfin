@@ -5,6 +5,22 @@ html.dark { color-scheme: light; }
 
 @theme {
   --font-cairo: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-primary: #6D28D9;
+  --color-secondary: #A855F7;
+  --color-brand-bg: #FAF9FF;
+  --color-surface: #FFFFFF;
+  --color-text-main: #18181B;
+  --color-text-muted: #71717A;
+  --color-border-main: #E4E4E7;
+  --color-success: #16A34A;
+  --color-warning: #CA8A04;
+  --color-danger: #DC2626;
+}
+
+body {
+  background-color: var(--color-brand-bg);
+  color: var(--color-text-main);
 }
 
 @media print {
