@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useStore } from '../hooks/useStore';
-import { Users, UserCheck, CreditCard, Wallet, TrendingUp, Edit2, X, Check, Database } from 'lucide-react';
+import { Users, UserCheck, CreditCard, Wallet, TrendingUp, Edit2, X, Check, Database, Phone, MapPin, Building2 } from 'lucide-react';
 import { DailyRecord, AttendanceStatus } from '../types';
 import { SmartEntryModal } from '../components/SmartEntryModal';
 import { Bot } from 'lucide-react';
@@ -107,21 +107,52 @@ export default function Dashboard() {
 
       {/* Company Info Banner */}
       {activeCompany && (
-        <div className="bg-surface dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-border-main dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-primary dark:text-secondary mb-1">
-              {activeCompany.name}
-            </h2>
-            {activeCompany.description && (
-              <p className="text-sm text-text-muted dark:text-gray-400">
-                {activeCompany.description}
-              </p>
+        <div className="bg-gradient-to-r from-surface to-brand-bg dark:from-slate-800 dark:to-slate-800/80 rounded-2xl p-6 sm:p-8 shadow-sm border border-border-main dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative overflow-hidden">
+          {/* Subtle Background Pattern/Glow */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+
+          <div className="flex items-center gap-5 relative z-10">
+            {activeCompany.logoBase64 ? (
+              <img 
+                src={activeCompany.logoBase64} 
+                alt={activeCompany.name} 
+                className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-xl border border-border-main bg-white shadow-sm p-1" 
+              />
+            ) : (
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-xl flex items-center justify-center text-primary shadow-sm border border-primary/20">
+                <Building2 className="w-8 h-8 sm:w-10 sm:h-10 opacity-80" />
+              </div>
             )}
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-main dark:text-white mb-1.5 tracking-tight">
+                {activeCompany.name}
+              </h2>
+              {activeCompany.description && (
+                <p className="text-sm sm:text-base text-text-muted dark:text-gray-400 font-medium">
+                  {activeCompany.description}
+                </p>
+              )}
+            </div>
           </div>
+
           {(activeCompany.phones || activeCompany.address) && (
-            <div className="flex flex-col gap-1 text-sm text-text-muted dark:text-gray-400 text-right sm:text-left">
-              {activeCompany.phones && <p>📞 {activeCompany.phones}</p>}
-              {activeCompany.address && <p>📍 {activeCompany.address}</p>}
+            <div className="flex flex-col gap-2.5 text-sm font-medium text-text-muted dark:text-gray-400 sm:text-left relative z-10 sm:border-r sm:border-border-main sm:pr-6 sm:mr-2">
+              {activeCompany.phones && (
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <Phone className="w-3.5 h-3.5" />
+                  </div>
+                  <span dir="ltr">{activeCompany.phones}</span>
+                </div>
+              )}
+              {activeCompany.address && (
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-md bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                    <MapPin className="w-3.5 h-3.5" />
+                  </div>
+                  <span>{activeCompany.address}</span>
+                </div>
+              )}
             </div>
           )}
         </div>

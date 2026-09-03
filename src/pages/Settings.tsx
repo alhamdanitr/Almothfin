@@ -1,14 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { useStore } from '../hooks/useStore';
-import { Building2, Plus, Edit2, Upload, Trash2, Check, X } from 'lucide-react';
+import { Building2, Plus, Edit2, Upload, Trash2, Check, X, Download, Database } from 'lucide-react';
 import { Company } from '../types';
 
 export default function Settings() {
-  const { companies, activeCompanyId, switchCompany, addCompany, updateCompany, deleteCompany } = useStore();
+  const { companies, activeCompanyId, switchCompany, addCompany, updateCompany, deleteCompany, workers, records, addWorker, addBulkRecords } = useStore();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importStatus, setImportStatus] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -21,6 +24,81 @@ export default function Settings() {
   const resetForm = () => {
     setFormData({ name: '', description: '', phones: '', address: '', logoBase64: '' });
     setEditingCompany(null);
+  };
+  
+  const handleExport = () => {
+    const exportData = {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      activeCompanyId,
+      workers,
+      records
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup-${activeCompanyId}-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!confirm('تنبيه: استيراد البيانات سيقوم بإضافة السجلات والعمال إلى المؤسسة النشطة حالياً. هل أنت متأكد من المتابعة؟')) {
+      if (importInputRef.current) importInputRef.current.value = '';
+      return;
+    }
+
+    setIsImporting(true);
+    setImportStatus('جاري تحليل الملف...');
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const content = event.target?.result as string;
+        const data = JSON.parse(content);
+        
+        if (!data.version || (!data.workers && !data.records)) {
+          throw new Error('ملف النسخة الاحتياطية غير صالح');
+        }
+
+        setImportStatus('جاري استيراد العمال...');
+        if (data.workers && Array.isArray(data.workers)) {
+          for (const worker of data.workers) {
+            const exists = workers.some(w => w.workerNumber === worker.workerNumber && w.name === worker.name);
+            if (!exists) {
+               const { id, ...workerData } = worker;
+               await addWorker(workerData);
+            }
+          }
+        }
+
+        setImportStatus('جاري استيراد السجلات...');
+        if (data.records && Array.isArray(data.records)) {
+           await addBulkRecords(data.records.map((r: any) => {
+              const { id, ...recordData } = r;
+              return recordData;
+           }));
+        }
+
+        setImportStatus('تم الاستيراد بنجاح!');
+        setTimeout(() => setImportStatus(null), 3000);
+      } catch (error) {
+        console.error('Import error:', error);
+        setImportStatus('حدث خطأ أثناء الاستيراد. يرجى التحقق من الملف.');
+        setTimeout(() => setImportStatus(null), 4000);
+      } finally {
+        setIsImporting(false);
+        if (importInputRef.current) importInputRef.current.value = '';
+      }
+    };
+    reader.readAsText(file);
   };
 
   const openAddModal = () => {
@@ -71,6 +149,51 @@ export default function Settings() {
 
   return (
     <div className="space-y-6">
+      
+      {/* Data Backup & Restore Section */}
+      <div className="bg-surface rounded-2xl shadow-sm border border-border-main overflow-hidden">
+        <div className="p-6 border-b border-border-main flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-bold text-text-main flex items-center">
+              <Database className="w-5 h-5 ml-2 text-primary" />
+              النسخ الاحتياطي والبيانات
+            </h3>
+            <p className="text-sm text-text-muted mt-1">
+              تصدير بيانات المؤسسة الحالية (عمال وسجلات) إلى ملف JSON أو استيرادها
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleExport}
+              className="flex items-center px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors font-medium"
+            >
+              <Download className="w-5 h-5 ml-2" />
+              تصدير البيانات
+            </button>
+            <input
+              type="file"
+              ref={importInputRef}
+              onChange={handleImport}
+              accept=".json"
+              className="hidden"
+            />
+            <button
+              onClick={() => importInputRef.current?.click()}
+              disabled={isImporting}
+              className="flex items-center px-4 py-2 bg-surface border border-border-main text-text-main rounded-lg hover:bg-brand-bg transition-colors font-medium disabled:opacity-50"
+            >
+              <Upload className="w-5 h-5 ml-2 text-text-muted" />
+              {isImporting ? 'جاري...' : 'استيراد البيانات'}
+            </button>
+          </div>
+        </div>
+        {importStatus && (
+          <div className="bg-primary/5 px-6 py-3 text-sm text-primary font-medium flex items-center">
+            <Check className="w-4 h-4 ml-2" /> {importStatus}
+          </div>
+        )}
+      </div>
+
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-text-main">إدارة المؤسسات</h2>
         <button 
