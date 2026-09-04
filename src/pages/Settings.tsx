@@ -24,6 +24,7 @@ export default function Settings() {
     deleteCompany,
     workers,
     records,
+    advances,
     addWorker,
     addBulkRecords,
   } = useStore();
@@ -55,8 +56,12 @@ export default function Settings() {
       version: "1.0",
       exportDate: new Date().toISOString(),
       activeCompanyId,
-      workers,
-      records,
+      data: {
+        companies,
+        workers,
+        records,
+        advances,
+      }
     };
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
       type: "application/json",
@@ -88,11 +93,12 @@ export default function Settings() {
       try {
         const content = event.target?.result as string;
         const data = JSON.parse(content);
-        if (!data.version || (!data.workers && !data.records)) {
+        const importData = data.data || data;
+        if (!data.version || (!importData.workers && !importData.records)) {
           throw new Error("ملف النسخة الاحتياطية غير صالح");
         }
-        if (data.workers && Array.isArray(data.workers)) {
-          for (const worker of data.workers) {
+        if (importData.workers && Array.isArray(importData.workers)) {
+          for (const worker of importData.workers) {
             const exists = workers.some(
               (w) =>
                 w.workerNumber === worker.workerNumber &&
@@ -105,9 +111,9 @@ export default function Settings() {
           }
         }
         setImportStatus("جاري استيراد السجلات...");
-        if (data.records && Array.isArray(data.records)) {
+        if (importData.records && Array.isArray(importData.records)) {
           await addBulkRecords(
-            data.records.map((r: any) => {
+            importData.records.map((r: any) => {
               const { id, ...recordData } = r;
               return recordData;
             }),

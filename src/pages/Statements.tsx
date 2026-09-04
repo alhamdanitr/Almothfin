@@ -276,7 +276,7 @@ export default function Statements() {
         >
           {statementsToRender.map((statementData, index) => (
             <div
-              key={statementData.month}
+              key={`${statementData.worker.id}-${statementData.month}`}
               className={`print-month-container space-y-2 ${index > 0 ? 'print:break-before-page' : ''}`}
             >
               {/* Print Header - Unified Report Header */}

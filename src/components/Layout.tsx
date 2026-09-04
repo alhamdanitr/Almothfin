@@ -18,6 +18,8 @@ import {
 import { cn } from "../lib/utils";
 import { useStore } from "../hooks/useStore";
 import { motion, AnimatePresence } from "motion/react";
+import { AutoBackup } from "./AutoBackup";
+
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
@@ -314,8 +316,9 @@ export function Layout() {
               }}
             </NavLink>
           ))}{" "}
-        </div>{" "}
-      </nav>{" "}
+        </div>
+      </nav>
+      <AutoBackup />
     </div>
   );
 }
