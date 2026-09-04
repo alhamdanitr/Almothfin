@@ -65,69 +65,85 @@ export default function Statements() {
       closeEditModal();
     }
   };
-  const statementDataByMonth = useMemo(() => {
-    if (!worker || !startDate || !endDate) return null;
-    const filteredRecords = records
-      .filter(
-        (r) =>
-          r.workerId === worker.id && r.date >= startDate && r.date <= endDate,
-      )
-      .sort((a, b) => a.date.localeCompare(b.date));
-    if (filteredRecords.length === 0) return null;
-    const groupedByMonth: Record<string, DailyRecord[]> = {};
-    filteredRecords.forEach((r) => {
-      const monthStr = r.date.substring(0, 7);
-      if (!groupedByMonth[monthStr]) groupedByMonth[monthStr] = [];
-      groupedByMonth[monthStr].push(r);
-    });
-    const months = Object.keys(groupedByMonth).sort();
-    return months.map((month) => {
-      const monthRecords = groupedByMonth[month];
-      let totalEarned = 0;
-      let totalAdvances = 0;
-      let totalAllowance = 0;
-      let totalDiscounts = 0;
-      let daysPresent = 0;
-      let daysHalf = 0;
-      let daysAbsent = 0;
-      let lastDailyRate = (worker.monthlySalary || 0) / 30;
-      monthRecords.forEach((r) => {
-        totalAdvances += Number(r.advancePayment || 0);
-        totalAllowance += Number(r.allowance || 0);
-        const dailyRate = getMonthlySalaryForDate(worker, r.date) / 30;
-        lastDailyRate = dailyRate;
-        const delayMins = Number(r.delayMinutes || 0);
-        const discountAmount = (delayMins / 720) * dailyRate;
-        totalDiscounts += discountAmount;
-        if (r.attendance === "full") {
-          daysPresent++;
-          totalEarned += dailyRate;
-        } else if (r.attendance === "half") {
-          daysHalf++;
-          totalEarned += dailyRate / 2;
-        } else if (r.attendance === "absent") {
-          daysAbsent++;
-        }
+  const statementsToRender = useMemo(() => {
+    if (!selectedWorkerId || !startDate || !endDate) return [];
+    
+    const workersToProcess = selectedWorkerId === "all" 
+      ? activeWorkers 
+      : activeWorkers.filter(w => w.id === selectedWorkerId);
+
+    if (workersToProcess.length === 0) return [];
+
+    const allReports = [];
+
+    workersToProcess.forEach(w => {
+      const filteredRecords = records
+        .filter((r) => r.workerId === w.id && r.date >= startDate && r.date <= endDate)
+        .sort((a, b) => a.date.localeCompare(b.date));
+      
+      if (filteredRecords.length === 0) return;
+
+      const groupedByMonth = {};
+      filteredRecords.forEach((r) => {
+        const monthStr = r.date.substring(0, 7);
+        if (!groupedByMonth[monthStr]) groupedByMonth[monthStr] = [];
+        groupedByMonth[monthStr].push(r);
       });
-      const netSalary =
-        totalEarned - totalAdvances - totalDiscounts - totalAllowance;
-      return {
-        month,
-        records: monthRecords,
-        summary: {
-          totalEarned: Math.round(totalEarned),
-          totalAdvances,
-          totalAllowance,
-          totalDiscounts: Math.round(totalDiscounts),
-          netSalary: Math.round(netSalary),
-          daysPresent,
-          daysHalf,
-          daysAbsent,
-          dailyRate: Math.round(lastDailyRate),
-        },
-      };
+
+      const months = Object.keys(groupedByMonth).sort();
+      months.forEach((month) => {
+        const monthRecords = groupedByMonth[month];
+        let totalEarned = 0;
+        let totalAdvances = 0;
+        let totalAllowance = 0;
+        let totalDiscounts = 0;
+        let daysPresent = 0;
+        let daysHalf = 0;
+        let daysAbsent = 0;
+        let lastDailyRate = (w.monthlySalary || 0) / 30;
+
+        monthRecords.forEach((r) => {
+          totalAdvances += Number(r.advancePayment || 0);
+          totalAllowance += Number(r.allowance || 0);
+          const dailyRate = getMonthlySalaryForDate(w, r.date) / 30;
+          lastDailyRate = dailyRate;
+          const delayMins = Number(r.delayMinutes || 0);
+          const discountAmount = (delayMins / 720) * dailyRate;
+          totalDiscounts += discountAmount;
+
+          if (r.attendance === "full") {
+            daysPresent++;
+            totalEarned += dailyRate;
+          } else if (r.attendance === "half") {
+            daysHalf++;
+            totalEarned += dailyRate / 2;
+          } else if (r.attendance === "absent") {
+            daysAbsent++;
+          }
+        });
+
+        const netSalary = totalEarned - totalAdvances - totalDiscounts - totalAllowance;
+        allReports.push({
+          worker: w,
+          month,
+          records: monthRecords,
+          summary: {
+            totalEarned: Math.round(totalEarned),
+            totalAdvances,
+            totalAllowance,
+            totalDiscounts: Math.round(totalDiscounts),
+            netSalary: Math.round(netSalary),
+            daysPresent,
+            daysHalf,
+            daysAbsent,
+            dailyRate: Math.round(lastDailyRate),
+          },
+        });
+      });
     });
-  }, [worker, startDate, endDate, records]);
+
+    return allReports;
+  }, [selectedWorkerId, activeWorkers, startDate, endDate, records]);
   const handlePrint = () => {
     window.print();
   };
@@ -171,8 +187,8 @@ export default function Statements() {
           "FAST",
         );
       }
-      const workerName = worker?.name?.replace(/\s+/g, "-") || "العامل";
-      pdf.save(`كشف-حساب-${workerName}.pdf`);
+      const fileName = selectedWorkerId === "all" ? "كشوفات-جميع-العمال.pdf" : `كشف-حساب-${worker?.name?.replace(/\s+/g, "-") || "العامل"}.pdf`;
+      pdf.save(fileName);
     } catch (error) {
       console.error("PDF export error:", error);
       /* fallback موثوق بدل عرض رسالة فشل فقط. */ window.print();
@@ -182,7 +198,7 @@ export default function Statements() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
         <h2 className="text-2xl font-bold text-text-main">كشوفات الحساب</h2>
-        {statementDataByMonth && statementDataByMonth.length > 0 && (
+        {statementsToRender && statementsToRender.length > 0 && (
           <div className="flex items-center space-x-2 space-x-reverse">
             <button
               onClick={handlePrint}
@@ -213,6 +229,7 @@ export default function Statements() {
                 className="w-full pl-4 pr-10 py-2.5 bg-brand-bg border border-border-main rounded-xl focus:ring-2 focus:ring-primary outline-none text-text-main appearance-none transition-colors"
               >
                 <option value="">-- اختر العامل --</option>
+                <option value="all">جميع العمال (الكل)</option>
                 {activeWorkers.map((w) => (
                   <option key={w.id} value={w.id}>
                     {w.name} ({w.workerNumber})
@@ -251,22 +268,22 @@ export default function Statements() {
           </div>
         </div>
       </div>
-      {statementDataByMonth && statementDataByMonth.length > 0 ? (
+      {statementsToRender && statementsToRender.length > 0 ? (
         <div
           ref={printRef}
           className="animate-in fade-in slide-in-from-bottom-4 duration-500 print:text-black print:bg-surface"
           dir="rtl"
         >
-          {statementDataByMonth.map((statementData, index) => (
+          {statementsToRender.map((statementData, index) => (
             <div
               key={statementData.month}
-              className="print-month-container space-y-2"
+              className={`print-month-container space-y-2 ${index > 0 ? 'print:break-before-page' : ''}`}
             >
               {/* Print Header - Unified Report Header */}
               <ReportHeader
                 title="كشف حساب العامل"
                 dynamicData={[
-                  { label: "اسم العامل", value: worker?.name || "غير معروف" },
+                  { label: "اسم العامل", value: statementData.worker.name || "غير معروف" },
                   { label: "عن شهر", value: statementData.month },
                   {
                     label: "تاريخ الإصدار",
@@ -586,9 +603,7 @@ export default function Statements() {
         </div>
       ) : (
         <div className="text-center py-12 text-text-muted print:hidden">
-          {worker
-            ? "لا توجد سجلات لهذا العامل في الفترة المحددة"
-            : "يرجى تحديد العامل والفترة الزمنية لعرض كشف الحساب"}
+          {selectedWorkerId ? "لا توجد سجلات في الفترة المحددة" : "يرجى تحديد العامل (أو الكل) والفترة الزمنية"}
         </div>
       )}
       {/* Edit Record Modal */}
@@ -597,7 +612,7 @@ export default function Statements() {
           <div className="w-full max-w-md bg-surface rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between px-4 py-3 print:px-2 print:py-2 border-b">
               <h3 className="text-lg font-bold text-text-main">
-                تعديل سجل {worker?.name}
+                تعديل سجل {activeWorkers.find(w => w.id === editingRecord?.workerId)?.name}
               </h3>
               <button
                 onClick={closeEditModal}
