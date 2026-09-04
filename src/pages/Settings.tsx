@@ -151,24 +151,59 @@ export default function Settings() {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({
-          ...prev,
-          logoBase64: reader.result as string,
-        }));
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 300;
+          const MAX_HEIGHT = 300;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // Compress to JPEG to ensure it stays well under 1MB limit for Firestore
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+            setFormData((prev) => ({
+              ...prev,
+              logoBase64: compressedBase64,
+            }));
+          }
+        };
+        img.src = event.target?.result as string;
       };
       reader.readAsDataURL(file);
     }
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingCompany) {
-      await updateCompany(editingCompany.id, formData);
-    } else {
-      await addCompany(formData);
+    try {
+      if (editingCompany) {
+        await updateCompany(editingCompany.id, formData);
+      } else {
+        await addCompany(formData);
+      }
+      setIsModalOpen(false);
+      resetForm();
+    } catch (error: any) {
+      console.error("Error saving company:", error);
+      alert("حدث خطأ أثناء الحفظ. تأكد من اتصالك بالإنترنت وأن حجم البيانات ليس كبيراً جداً.");
     }
-    setIsModalOpen(false);
-    resetForm();
   };
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
