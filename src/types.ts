@@ -1,4 +1,4 @@
-export type AttendanceStatus = 'full' | 'half' | 'absent';
+export type AttendanceStatus = "full" | "half" | "absent";
 
 export interface Company {
   id: string;
@@ -24,7 +24,7 @@ export interface Worker {
   salaryHistory?: SalaryChange[]; // سجل الرواتب حسب تاريخ السريان
   dailyAllowance: number; // الصرفة اليومية المعتادة
   joinDate: string; // تاريخ الانضمام
-  status?: 'active' | 'inactive'; // حالة العامل
+  status?: "active" | "inactive"; // حالة العامل
 }
 
 export interface DailyRecord {
@@ -38,7 +38,7 @@ export interface DailyRecord {
   note: string;
 }
 
-export type AdvanceDeductionMethod = 'automatic' | 'manual';
+export type AdvanceDeductionMethod = "automatic" | "manual";
 
 export interface Advance {
   id: string;
@@ -48,7 +48,7 @@ export interface Advance {
   date: string;
   note: string;
   deductionMethod: AdvanceDeductionMethod;
-  status: 'active' | 'completed';
+  status: "active" | "completed";
 }
 
 export interface DashboardStats {

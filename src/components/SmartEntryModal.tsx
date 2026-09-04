@@ -1,84 +1,360 @@
-import { useMemo, useState } from 'react';
-import { Bot, X, Loader2, AlertCircle, Check, MessageSquare, ShieldAlert, RotateCcw } from 'lucide-react';
-import { useStore } from '../hooks/useStore';
-import { AttendanceStatus, DailyRecord } from '../types';
-import { parseAttendanceText } from '../lib/fastAttendanceParser';
-
-interface SmartEntryModalProps { onClose: () => void; fullPage?: boolean; }
-type ChatMessage = { role: 'user' | 'assistant'; text: string };
-export function SmartEntryModal({ onClose, fullPage = false }: SmartEntryModalProps) {
+import { useMemo, useState } from "react";
+import {
+  Bot,
+  X,
+  Loader2,
+  AlertCircle,
+  Check,
+  MessageSquare,
+  ShieldAlert,
+  RotateCcw,
+} from "lucide-react";
+import { useStore } from "../hooks/useStore";
+import { AttendanceStatus, DailyRecord } from "../types";
+import { parseAttendanceText } from "../lib/fastAttendanceParser";
+interface SmartEntryModalProps {
+  onClose: () => void;
+  fullPage?: boolean;
+}
+type ChatMessage = { role: "user" | "assistant"; text: string };
+export function SmartEntryModal({
+  onClose,
+  fullPage = false,
+}: SmartEntryModalProps) {
   const { workers, records, addBulkRecords } = useStore();
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   const [isParsing, setIsParsing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [parsedRecords, setParsedRecords] = useState<any[] | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [chat, setChat] = useState<ChatMessage[]>(() => {
-    try { return JSON.parse(localStorage.getItem('almothfin_ai_chat') || '[]'); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem("almothfin_ai_chat") || "[]");
+    } catch {
+      return [];
+    }
   });
-
-  const activeWorkers = useMemo(() => workers.filter(w => w.status !== 'inactive'), [workers]);
+  const activeWorkers = useMemo(
+    () => workers.filter((w) => w.status !== "inactive"),
+    [workers],
+  );
   const saveChat = (next: ChatMessage[]) => {
     setChat(next);
-    localStorage.setItem('almothfin_ai_chat', JSON.stringify(next.slice(-30)));
+    localStorage.setItem("almothfin_ai_chat", JSON.stringify(next.slice(-30)));
   };
-
   const handleParse = async () => {
     if (!text.trim()) return;
-    setIsParsing(true); setError(''); setParsedRecords(null);
-    const nextChat = [...chat, { role: 'user' as const, text: text.trim() }];
+    setIsParsing(true);
+    setError("");
+    setParsedRecords(null);
+    const nextChat = [...chat, { role: "user" as const, text: text.trim() }];
     saveChat(nextChat);
     try {
-      const data = parseAttendanceText(text, activeWorkers, records, new Date().toISOString().slice(0, 10));
+      const data = parseAttendanceText(
+        text,
+        activeWorkers,
+        records,
+        new Date().toISOString().slice(0, 10),
+      );
       const preview = data.records;
-      if (!preview.length) throw new Error('لم يتم التعرف على أي سجل قابل للمراجعة.');
+      if (!preview.length)
+        throw new Error("لم يتم التعرف على أي سجل قابل للمراجعة.");
       setParsedRecords(preview);
       setWarnings(data.warnings);
-      const summary = `تم التحليل محليًا خلال لحظة واحدة: ${preview.length} سجلًا. ${data.warnings.length ? `يوجد ${data.warnings.length} تحذيرًا؛ راجعها قبل الحفظ.` : 'لا توجد تحذيرات.'}`;
-      saveChat([...nextChat, { role: 'assistant', text: summary }]);
-      setText('');
-    } catch (e: any) { setError(e.message || 'تعذر تحليل الرسالة.'); }
-    finally { setIsParsing(false); }
+      const summary = `تم التحليل محليًا خلال لحظة واحدة: ${preview.length} سجلًا. ${data.warnings.length ? `يوجد ${data.warnings.length} تحذيرًا؛ راجعها قبل الحفظ.` : "لا توجد تحذيرات."}`;
+      saveChat([...nextChat, { role: "assistant", text: summary }]);
+      setText("");
+    } catch (e: any) {
+      setError(e.message || "تعذر تحليل الرسالة.");
+    } finally {
+      setIsParsing(false);
+    }
   };
-
-  const safeRecords = (parsedRecords || []).filter(r => !r.duplicate && !r.unknownWorker && Number(r.confidence ?? 1) >= 0.85);
+  const safeRecords = (parsedRecords || []).filter(
+    (r) =>
+      !r.duplicate && !r.unknownWorker && Number(r.confidence ?? 1) >= 0.85,
+  );
   const updateParsedRecord = (index: number, patch: Record<string, any>) => {
-    setParsedRecords(prev => prev ? prev.map((record, i) => i === index ? { ...record, ...patch } : record) : prev);
+    setParsedRecords((prev) =>
+      prev
+        ? prev.map((record, i) =>
+            i === index ? { ...record, ...patch } : record,
+          )
+        : prev,
+    );
   };
-  const heldRecords = (parsedRecords || []).filter(r => !safeRecords.includes(r));
-
+  const heldRecords = (parsedRecords || []).filter(
+    (r) => !safeRecords.includes(r),
+  );
   const handleSave = async () => {
     if (!safeRecords.length) return;
     setIsSaving(true);
     const unique = new Map<string, any>();
-    safeRecords.forEach(r => unique.set(`${r.workerId}:${r.date}`, r));
-    const recordsToSave: Omit<DailyRecord, 'id'>[] = [...unique.values()].map(r => ({
-      workerId: r.workerId, date: r.date, attendance: r.attendance as AttendanceStatus,
-      allowance: Number(r.allowance) || 0, advancePayment: Number(r.advancePayment) || 0,
-      delayMinutes: Number(r.delayMinutes) || 0, note: r.note || ''
-    }));
+    safeRecords.forEach((r) => unique.set(`${r.workerId}:${r.date}`, r));
+    const recordsToSave: Omit<DailyRecord, "id">[] = [...unique.values()].map(
+      (r) => ({
+        workerId: r.workerId,
+        date: r.date,
+        attendance: r.attendance as AttendanceStatus,
+        allowance: Number(r.allowance) || 0,
+        advancePayment: Number(r.advancePayment) || 0,
+        delayMinutes: Number(r.delayMinutes) || 0,
+        note: r.note || "",
+      }),
+    );
     try {
       await addBulkRecords(recordsToSave);
-      saveChat([...chat, { role: 'assistant', text: `تم حفظ ${recordsToSave.length} سجلًا واضحًا. تم تعليق ${heldRecords.length} سجلًا للمراجعة.` }]);
-      setParsedRecords(null); setWarnings([]);
-      alert(`تم حفظ ${recordsToSave.length} سجلًا. تم تعليق ${heldRecords.length} سجلًا مشتبهًا أو مكررًا.`);
-    } catch { setError('فشل حفظ السجلات؛ لم تكتمل العملية.'); }
-    finally { setIsSaving(false); }
+      saveChat([
+        ...chat,
+        {
+          role: "assistant",
+          text: `تم حفظ ${recordsToSave.length} سجلًا واضحًا. تم تعليق ${heldRecords.length} سجلًا للمراجعة.`,
+        },
+      ]);
+      setParsedRecords(null);
+      setWarnings([]);
+      alert(
+        `تم حفظ ${recordsToSave.length} سجلًا. تم تعليق ${heldRecords.length} سجلًا مشتبهًا أو مكررًا.`,
+      );
+    } catch {
+      setError("فشل حفظ السجلات؛ لم تكتمل العملية.");
+    } finally {
+      setIsSaving(false);
+    }
   };
-
-  return <div className={fullPage ? 'min-h-[calc(100vh-2rem)]' : 'fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm'} dir="rtl">
-    <div className={`w-full ${fullPage ? 'max-w-6xl mx-auto min-h-[calc(100vh-2rem)]' : 'max-w-3xl max-h-[92vh]'} bg-slate-50 rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-sky-200/70`}>
-      <div className="flex items-center justify-between px-6 py-4 border-b border-brand-bg bg-primary/10">
-        <div className="flex items-center gap-3"><div className="bg-primary/20 dark:bg-primary/90 p-2 rounded-lg text-primary"><Bot className="w-6 h-6" /></div><div><h3 className="text-lg font-bold text-primary/80 dark:text-primary/40">المساعد الذكي للترحيل</h3><p className="text-xs text-primary/70 dark:text-secondary/70">تحليل، مراجعة، ثم حفظ بموافقتك فقط</p></div></div>
-        <button onClick={onClose} className="text-text-muted hover:text-text-muted p-2 rounded-full"><X className="w-5 h-5" /></button>
+  return (
+    <div
+      className={
+        fullPage
+          ? " min-h-[calc(100vh-2rem)]"
+          : "fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      }
+      dir="rtl"
+    >
+      <div
+        className={`w-full ${fullPage ? " max-w-6xl mx-auto min-h-[calc(100vh-2rem)]" : " max-w-3xl max-h-[92vh]"} bg-surface rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-sky-200/70`}
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-brand-bg bg-primary/10">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary/20 p-2 rounded-lg text-primary">
+              <Bot className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-primary/80">
+                المساعد الذكي للترحيل
+              </h3>
+              <p className="text-xs text-primary/70">
+                تحليل، مراجعة، ثم حفظ بموافقتك فقط
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-text-muted hover:text-text-muted p-2 rounded-full"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-6 overflow-y-auto flex-1 space-y-5">
+          <div className="rounded-xl border border-brand-bg bg-primary/10/60 p-4">
+            <div className="flex gap-2 items-center text-sm font-bold text-primary">
+              <ShieldAlert className="w-4 h-4" />
+              قواعد الترحيل الفعالة
+            </div>
+            <p className="mt-2 text-xs leading-6 text-text-muted">
+              المبلغ بلا وصف = صرفة يومية، و«سحبية» = سحبية مستقلة، والتأخير
+              يحوّل إلى دقائق. لا تعديل للسجلات السابقة، ولا حفظ لاسم غير مطابق
+              أو سجل مكرر أو حالة غامضة.
+            </p>
+          </div>
+          {chat.length > 0 && (
+            <div className="space-y-2 max-h-32 overflow-y-auto rounded-xl bg-brand-bg p-3">
+              {chat.slice(-8).map((m, i) => (
+                <div
+                  key={i}
+                  className={`text-xs p-2 rounded-lg ${m.role === "user" ? "bg-surface " : "bg-primary/10 text-primary "}`}
+                >
+                  <b>{m.role === "user" ? "أنت" : "المساعد"}:</b> {m.text}
+                </div>
+              ))}
+            </div>
+          )}
+          {!parsedRecords ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <MessageSquare className="w-4 h-4 text-secondary" />
+                أرسل رسالة الترحيل
+              </div>
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="مثال:\nالأربعاء 1/7\nمعتصم 4000\nمصطفى 3000 سحبية\nحسام 3000 و5000 سحبية غياب\nعبدالرحمن 2000 داوم ساعتين وتأخير 4 ساعات"
+                className="w-full h-44 p-4 bg-brand-bg border border-border-main rounded-xl focus:ring-2 focus:ring-primary outline-none text-text-main text-sm resize-none"
+              />
+              {error && (
+                <div className="flex gap-2 items-center text-danger bg-danger/10 p-3 rounded-lg text-sm">
+                  <AlertCircle className="w-5 h-5" />
+                  {error}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4 rounded-2xl bg-sky-50/70 p-4 border border-sky-100">
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold text-sky-950">معاينة قبل الحفظ</h4>
+                <button
+                  onClick={() => setParsedRecords(null)}
+                  className="text-sm text-primary hover:underline flex items-center gap-1"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  تعديل الرسالة
+                </button>
+              </div>
+              {warnings.length > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-warning/10 p-3 text-sm text-amber-800">
+                  <div className="font-bold flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    تحذيرات تحتاج مراجعة
+                  </div>
+                  <ul className="mt-2 space-y-1 list-disc pr-5">
+                    {warnings.map((w, i) => (
+                      <li key={i}>{w}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="overflow-x-auto rounded-xl border border-sky-200 bg-surface">
+                <table className=" min-w-full text-right text-xs">
+                  <thead className="bg-brand-bg">
+                    <tr>
+                      <th className="p-3">العامل</th>
+                      <th className="p-3">التاريخ</th>
+                      <th className="p-3">الحضور</th>
+                      <th className="p-3">الصرفة</th>
+                      <th className="p-3">السحبية</th>
+                      <th className="p-3">التأخير</th>
+                      <th className="p-3">الحالة</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {parsedRecords.map((r, i) => (
+                      <tr key={i} className="border-t">
+                        <td className="p-3 font-semibold">{r.workerName}</td>
+                        <td className="p-3">{r.date}</td>
+                        <td className="p-2">
+                          <select
+                            value={r.attendance}
+                            onChange={(e) =>
+                              updateParsedRecord(i, {
+                                attendance: e.target.value,
+                              })
+                            }
+                            className="w-full min-w-24 rounded-lg border border-sky-200 bg-surface px-2 py-1.5"
+                          >
+                            <option value="full">حاضر</option>
+                            <option value="half">نصف يوم</option>
+                            <option value="absent">غائب</option>
+                          </select>
+                        </td>
+                        <td className="p-2">
+                          <input
+                            type="number"
+                            min="0"
+                            value={r.allowance ?? 0}
+                            onChange={(e) =>
+                              updateParsedRecord(i, {
+                                allowance: Number(e.target.value),
+                              })
+                            }
+                            className="w-24 rounded-lg border border-sky-200 bg-surface px-2 py-1.5"
+                          />
+                        </td>
+                        <td className="p-2">
+                          <input
+                            type="number"
+                            value={r.advancePayment ?? 0}
+                            onChange={(e) =>
+                              updateParsedRecord(i, {
+                                advancePayment: Number(e.target.value),
+                              })
+                            }
+                            className="w-24 rounded-lg border border-sky-200 bg-surface px-2 py-1.5"
+                          />
+                        </td>
+                        <td className="p-2">
+                          <input
+                            type="number"
+                            min="0"
+                            value={r.delayMinutes ?? 0}
+                            onChange={(e) =>
+                              updateParsedRecord(i, {
+                                delayMinutes: Number(e.target.value),
+                              })
+                            }
+                            className="w-20 rounded-lg border border-sky-200 bg-surface px-2 py-1.5"
+                          />
+                          د
+                        </td>
+                        <td
+                          className={`p-3 font-bold ${safeRecords.includes(r) ? "text-success" : "text-warning"}`}
+                        >
+                          {safeRecords.includes(r)
+                            ? "جاهز للحفظ"
+                            : "معلّق للمراجعة"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-text-muted">
+                سيتم حفظ {safeRecords.length} سجلًا واضحًا، وتعليق
+                {heldRecords.length} سجلًا مشتبهًا أو مكررًا دون تعديل السابق.
+              </p>
+            </div>
+          )}
+        </div>
+        <div className="p-4 border-t bg-brand-bg flex gap-3">
+          {!parsedRecords ? (
+            <button
+              onClick={handleParse}
+              disabled={isParsing || !text.trim()}
+              className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-white px-6 py-3 rounded-xl font-medium"
+            >
+              {isParsing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  جاري التحليل...
+                </>
+              ) : (
+                "تحليل ومراجعة الرسالة"
+              )}
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setParsedRecords(null)}
+                className="flex-1 px-5 py-3 rounded-xl border border-border-main"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving || !safeRecords.length}
+                className="flex-[2] flex items-center justify-center gap-2 bg-success hover:bg-emerald-700 disabled:bg-emerald-400 text-white px-6 py-3 rounded-xl font-medium"
+              >
+                {isSaving ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Check className="w-5 h-5" />
+                )}
+                اعتماد السجلات الواضحة فقط
+              </button>
+            </>
+          )}
+        </div>
       </div>
-      <div className="p-6 overflow-y-auto flex-1 space-y-5">
-        <div className="rounded-xl border border-brand-bg dark:border-primary/80/40 bg-primary/10/60 dark:bg-primary/80/10 p-4"><div className="flex gap-2 items-center text-sm font-bold text-primary dark:text-primary/40"><ShieldAlert className="w-4 h-4" />قواعد الترحيل الفعالة</div><p className="mt-2 text-xs leading-6 text-text-muted dark:text-gray-300">المبلغ بلا وصف = صرفة يومية، و«سحبية» = سحبية مستقلة، والتأخير يحوّل إلى دقائق. لا تعديل للسجلات السابقة، ولا حفظ لاسم غير مطابق أو سجل مكرر أو حالة غامضة.</p></div>
-        {chat.length > 0 && <div className="space-y-2 max-h-32 overflow-y-auto rounded-xl bg-brand-bg dark:bg-slate-900 p-3">{chat.slice(-8).map((m, i) => <div key={i} className={`text-xs p-2 rounded-lg ${m.role === 'user' ? 'bg-surface dark:bg-slate-800' : 'bg-primary/10 dark:bg-primary/80/20 text-primary dark:text-primary/40'}`}><b>{m.role === 'user' ? 'أنت' : 'المساعد'}:</b> {m.text}</div>)}</div>}
-        {!parsedRecords ? <div className="space-y-3"><div className="flex items-center gap-2 text-sm font-semibold"><MessageSquare className="w-4 h-4 text-secondary" />أرسل رسالة الترحيل</div><textarea value={text} onChange={e => setText(e.target.value)} placeholder="مثال:\nالأربعاء 1/7\nمعتصم 4000\nمصطفى 3000 سحبية\nحسام 3000 و5000 سحبية غياب\nعبدالرحمن 2000 داوم ساعتين وتأخير 4 ساعات" className="w-full h-44 p-4 bg-brand-bg dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white text-sm resize-none" />{error && <div className="flex gap-2 items-center text-danger bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-sm"><AlertCircle className="w-5 h-5" />{error}</div>}</div> : <div className="space-y-4 rounded-2xl bg-sky-50/70 dark:bg-slate-900/50 p-4 border border-sky-100 dark:border-slate-700"><div className="flex items-center justify-between"><h4 className="font-semibold text-sky-950 dark:text-sky-200">معاينة قبل الحفظ</h4><button onClick={() => setParsedRecords(null)} className="text-sm text-primary hover:underline flex items-center gap-1"><RotateCcw className="w-4 h-4" />تعديل الرسالة</button></div>{warnings.length > 0 && <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-800 dark:text-amber-300"><div className="font-bold flex items-center gap-2"><AlertCircle className="w-4 h-4" />تحذيرات تحتاج مراجعة</div><ul className="mt-2 space-y-1 list-disc pr-5">{warnings.map((w, i) => <li key={i}>{w}</li>)}</ul></div>}<div className="overflow-x-auto rounded-xl border border-sky-200 dark:border-slate-700 bg-surface dark:bg-slate-800"><table className="min-w-full text-right text-xs"><thead className="bg-brand-bg dark:bg-slate-900"><tr><th className="p-3">العامل</th><th className="p-3">التاريخ</th><th className="p-3">الحضور</th><th className="p-3">الصرفة</th><th className="p-3">السحبية</th><th className="p-3">التأخير</th><th className="p-3">الحالة</th></tr></thead><tbody>{parsedRecords.map((r, i) => <tr key={i} className="border-t dark:border-slate-700"><td className="p-3 font-semibold">{r.workerName}</td><td className="p-3">{r.date}</td><td className="p-2"><select value={r.attendance} onChange={e => updateParsedRecord(i, { attendance: e.target.value })} className="w-full min-w-24 rounded-lg border border-sky-200 bg-surface px-2 py-1.5"><option value="full">حاضر</option><option value="half">نصف يوم</option><option value="absent">غائب</option></select></td><td className="p-2"><input type="number" min="0" value={r.allowance ?? 0} onChange={e => updateParsedRecord(i, { allowance: Number(e.target.value) })} className="w-24 rounded-lg border border-sky-200 bg-surface px-2 py-1.5" /></td><td className="p-2"><input type="number" value={r.advancePayment ?? 0} onChange={e => updateParsedRecord(i, { advancePayment: Number(e.target.value) })} className="w-24 rounded-lg border border-sky-200 bg-surface px-2 py-1.5" /></td><td className="p-2"><input type="number" min="0" value={r.delayMinutes ?? 0} onChange={e => updateParsedRecord(i, { delayMinutes: Number(e.target.value) })} className="w-20 rounded-lg border border-sky-200 bg-surface px-2 py-1.5" /> د</td><td className={`p-3 font-bold ${safeRecords.includes(r) ? 'text-success' : 'text-amber-600'}`}>{safeRecords.includes(r) ? 'جاهز للحفظ' : 'معلّق للمراجعة'}</td></tr>)}</tbody></table></div><p className="text-xs text-text-muted">سيتم حفظ {safeRecords.length} سجلًا واضحًا، وتعليق {heldRecords.length} سجلًا مشتبهًا أو مكررًا دون تعديل السابق.</p></div>}
-      </div>
-      <div className="p-4 border-t dark:border-slate-700 bg-brand-bg dark:bg-slate-900/50 flex gap-3">{!parsedRecords ? <button onClick={handleParse} disabled={isParsing || !text.trim()} className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-white px-6 py-3 rounded-xl font-medium">{isParsing ? <><Loader2 className="w-5 h-5 animate-spin" />جاري التحليل...</> : 'تحليل ومراجعة الرسالة'}</button> : <><button onClick={() => setParsedRecords(null)} className="flex-1 px-5 py-3 rounded-xl border border-border-main dark:border-slate-600">إلغاء</button><button onClick={handleSave} disabled={isSaving || !safeRecords.length} className="flex-[2] flex items-center justify-center gap-2 bg-success hover:bg-emerald-700 disabled:bg-emerald-400 text-white px-6 py-3 rounded-xl font-medium">{isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}اعتماد السجلات الواضحة فقط</button></>}</div>
     </div>
-  </div>;
+  );
 }

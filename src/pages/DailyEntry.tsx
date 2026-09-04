@@ -1,53 +1,58 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useStore } from '../hooks/useStore';
-import { Save, Calendar, Bot, Wand2, Loader2, AlertCircle } from 'lucide-react';
-import { AttendanceStatus } from '../types';
-import { parseAttendanceText } from '../lib/fastAttendanceParser';
-
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useStore } from "../hooks/useStore";
+import { Save, Calendar, Bot, Wand2, Loader2, AlertCircle } from "lucide-react";
+import { AttendanceStatus } from "../types";
+import { parseAttendanceText } from "../lib/fastAttendanceParser";
 export default function DailyEntry() {
   const { workers, records, addBulkRecords } = useStore();
-  
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split("T")[0],
+  );
   const [isSaving, setIsSaving] = useState(false);
-  
-  const [aiText, setAiText] = useState('');
+  const [aiText, setAiText] = useState("");
   const [isAiParsing, setIsAiParsing] = useState(false);
-  const [aiError, setAiError] = useState('');
-  
-  // Only show active workers
-  const activeWorkers = useMemo(() => workers.filter(w => w.status !== 'inactive'), [workers]);
-
-  // State for the form: key is workerId
-  const [entries, setEntries] = useState<Record<string, {
-    attendance: AttendanceStatus,
-    allowance: string,
-    advancePayment: string,
-    delayMinutes: string,
-    note: string
-  }>>({});
+  const [aiError, setAiError] = useState("");
+  /* Only show active workers */ const activeWorkers = useMemo(
+    () => workers.filter((w) => w.status !== "inactive"),
+    [workers],
+  );
+  /* State for the form: key is workerId */ const [entries, setEntries] =
+    useState<
+      Record<
+        string,
+        {
+          attendance: AttendanceStatus;
+          allowance: string;
+          advancePayment: string;
+          delayMinutes: string;
+          note: string;
+        }
+      >
+    >({});
   const pendingParsedEntries = useRef<typeof entries | null>(null);
-
   useEffect(() => {
     const initialEntries: typeof entries = {};
-    const existingRecords = records.filter(r => r.date === selectedDate);
-    
-    activeWorkers.forEach(worker => {
-      const existing = existingRecords.find(r => r.workerId === worker.id);
+    const existingRecords = records.filter((r) => r.date === selectedDate);
+    activeWorkers.forEach((worker) => {
+      const existing = existingRecords.find((r) => r.workerId === worker.id);
       if (existing) {
         initialEntries[worker.id] = {
           attendance: existing.attendance,
-          allowance: String(existing.allowance !== undefined ? existing.allowance : ''),
-          advancePayment: String(existing.advancePayment || ''),
-          delayMinutes: String(existing.delayMinutes || ''),
-          note: existing.note || ''
+          allowance: String(
+            existing.allowance !== undefined ? existing.allowance : "",
+          ),
+          advancePayment: String(existing.advancePayment || ""),
+          delayMinutes: String(existing.delayMinutes || ""),
+          note: existing.note || "",
         };
       } else {
         initialEntries[worker.id] = {
-          attendance: 'full',
-          allowance: worker.dailyAllowance > 0 ? String(worker.dailyAllowance) : '',
-          advancePayment: '',
-          delayMinutes: '',
-          note: ''
+          attendance: "full",
+          allowance:
+            worker.dailyAllowance > 0 ? String(worker.dailyAllowance) : "",
+          advancePayment: "",
+          delayMinutes: "",
+          note: "",
         };
       }
     });
@@ -58,18 +63,20 @@ export default function DailyEntry() {
       setEntries(initialEntries);
     }
   }, [selectedDate, activeWorkers, records]);
-
   const hasExistingRecords = useMemo(() => {
-    return records.some(r => r.date === selectedDate);
+    return records.some((r) => r.date === selectedDate);
   }, [records, selectedDate]);
-
-
   const parseWithAi = async () => {
     if (!aiText.trim()) return;
     setIsAiParsing(true);
-    setAiError('');
+    setAiError("");
     try {
-      const data = parseAttendanceText(aiText, activeWorkers, records, selectedDate);
+      const data = parseAttendanceText(
+        aiText,
+        activeWorkers,
+        records,
+        selectedDate,
+      );
       const newEntries = { ...entries };
       let newDate = selectedDate;
       data.records.forEach((record) => {
@@ -77,43 +84,51 @@ export default function DailyEntry() {
         if (record.workerId) {
           newEntries[record.workerId] = {
             attendance: record.attendance,
-            allowance: String(record.allowance || ''),
-            advancePayment: String(record.advancePayment || ''),
-            delayMinutes: String(record.delayMinutes || ''),
-            note: record.note || ''
+            allowance: String(record.allowance || ""),
+            advancePayment: String(record.advancePayment || ""),
+            delayMinutes: String(record.delayMinutes || ""),
+            note: record.note || "",
           };
         }
       });
-      if (!data.records.length) throw new Error('لم يتم التعرف على سجل قابل للمراجعة.');
+      if (!data.records.length)
+        throw new Error("لم يتم التعرف على سجل قابل للمراجعة.");
       pendingParsedEntries.current = newEntries;
       if (newDate !== selectedDate) setSelectedDate(newDate);
       else {
         setEntries(newEntries);
         pendingParsedEntries.current = null;
       }
-      setAiText('');
+      setAiText("");
     } catch (e: any) {
       setAiError(e.message);
     } finally {
       setIsAiParsing(false);
     }
   };
-
-  const handleEntryChange = (workerId: string, field: string, value: string) => {
-    setEntries(prev => ({
+  const handleEntryChange = (
+    workerId: string,
+    field: string,
+    value: string,
+  ) => {
+    setEntries((prev) => ({
       ...prev,
       [workerId]: {
-        ...(prev[workerId] || { attendance: 'full', allowance: '', advancePayment: '', delayMinutes: '', note: '' }),
-        [field]: value
-      }
+        ...(prev[workerId] || {
+          attendance: "full",
+          allowance: "",
+          advancePayment: "",
+          delayMinutes: "",
+          note: "",
+        }),
+        [field]: value,
+      },
     }));
   };
-
   const handleSave = () => {
     setIsSaving(true);
     const newRecords: any[] = [];
-    
-    activeWorkers.forEach(worker => {
+    activeWorkers.forEach((worker) => {
       const entry = entries[worker.id];
       if (entry) {
         newRecords.push({
@@ -123,50 +138,47 @@ export default function DailyEntry() {
           allowance: Number(entry.allowance) || 0,
           advancePayment: Number(entry.advancePayment) || 0,
           delayMinutes: Number(entry.delayMinutes) || 0,
-          note: entry.note
+          note: entry.note,
         });
       }
     });
-
     addBulkRecords(newRecords).then(() => {
       setIsSaving(false);
-      alert('تم حفظ السجلات بنجاح!');
+      alert("تم حفظ السجلات بنجاح!");
     });
   };
-
   if (activeWorkers.length === 0) {
     return (
-      <div className="p-8 text-center text-text-muted bg-surface dark:bg-slate-800 rounded-2xl shadow-sm border border-border-main dark:border-slate-700">
+      <div className="p-8 text-center text-text-muted bg-surface rounded-2xl shadow-sm border border-border-main">
         لا يوجد عمال فعالين مسجلين لتعبئة اليومية.
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-text-main dark:text-white">الترحيل اليومي</h2>
-          <p className="text-sm text-text-muted mt-1">تسجيل الحضور والصرفيات لجميع العمال ليوم محدد</p>
+          <h2 className="text-2xl font-bold text-text-main">الترحيل اليومي</h2>
+          <p className="text-sm text-text-muted mt-1">
+            تسجيل الحضور والصرفيات لجميع العمال ليوم محدد
+          </p>
           {hasExistingRecords && (
-            <p className="text-sm text-amber-600 dark:text-amber-400 mt-2 font-medium bg-amber-50 dark:bg-amber-900/30 inline-block px-3 py-1 rounded-md">
+            <p className="text-sm text-warning mt-2 font-medium bg-warning/10 inline-block px-3 py-1 rounded-md">
               تنبيه: أنت تقوم بتعديل بيانات مسجلة مسبقاً لهذا اليوم.
             </p>
           )}
         </div>
-        
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-48">
             <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
-            <input 
+            <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full pl-3 pr-10 py-2 text-sm bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white shadow-sm"
+              className="w-full pl-3 pr-10 py-2 text-sm bg-surface border border-border-main rounded-xl focus:ring-2 focus:ring-primary outline-none text-text-main shadow-sm"
             />
           </div>
-          
-          <button 
+          <button
             onClick={handleSave}
             disabled={isSaving}
             className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-xl shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 transition-colors"
@@ -180,39 +192,78 @@ export default function DailyEntry() {
           </button>
         </div>
       </div>
-
-      <div className="bg-surface dark:bg-slate-800 shadow-sm rounded-2xl border border-border-main dark:border-slate-700 overflow-hidden">
-        
+      <div className="bg-surface shadow-sm rounded-2xl border border-border-main overflow-hidden">
         {/* Desktop Table */}
         <div className="hidden lg:block overflow-x-auto">
-          <table className="min-w-full text-right divide-y divide-gray-200 dark:divide-slate-700">
-            <thead className="bg-brand-bg dark:bg-slate-900/50">
+          <table className=" min-w-full text-right divide-y divide-border-main">
+            <thead className="bg-brand-bg">
               <tr>
-                <th scope="col" className="px-4 py-3 text-sm font-semibold text-text-main dark:text-gray-300 w-[15%]">اسم العامل</th>
-                <th scope="col" className="px-4 py-3 text-sm font-semibold text-text-main dark:text-gray-300 w-[15%]">الحضور</th>
-                <th scope="col" className="px-4 py-3 text-sm font-semibold text-text-main dark:text-gray-300 w-[15%]">الصرفة (ر.ي)</th>
-                <th scope="col" className="px-4 py-3 text-sm font-semibold text-text-main dark:text-gray-300 w-[15%]">السحبيات (ر.ي)</th>
-                <th scope="col" className="px-4 py-3 text-sm font-semibold text-text-main dark:text-gray-300 w-[15%]">التأخير (دقيقة)</th>
-                <th scope="col" className="px-4 py-3 text-sm font-semibold text-text-main dark:text-gray-300 w-[25%]">ملاحظات</th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-sm font-semibold text-text-main w-[15%]"
+                >
+                  اسم العامل
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-sm font-semibold text-text-main w-[15%]"
+                >
+                  الحضور
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-sm font-semibold text-text-main w-[15%]"
+                >
+                  الصرفة (ر.ي)
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-sm font-semibold text-text-main w-[15%]"
+                >
+                  السحبيات (ر.ي)
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-sm font-semibold text-text-main w-[15%]"
+                >
+                  التأخير (دقيقة)
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-sm font-semibold text-text-main w-[25%]"
+                >
+                  ملاحظات
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-700/50">
+            <tbody className="divide-y divide-border-main">
               {activeWorkers.map((worker) => {
-                const entry = entries[worker.id] || { attendance: 'full', allowance: '', advancePayment: '', delayMinutes: '', note: '' };
+                const entry = entries[worker.id] || {
+                  attendance: "full",
+                  allowance: "",
+                  advancePayment: "",
+                  delayMinutes: "",
+                  note: "",
+                };
                 return (
-                  <tr key={worker.id} className="hover:bg-brand-bg dark:hover:bg-slate-700/50 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-text-main dark:text-white">
+                  <tr
+                    key={worker.id}
+                    className="hover:bg-brand-bg transition-colors"
+                  >
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-text-main">
                       {worker.name}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <select
                         value={entry.attendance}
-                        onChange={(e) => handleEntryChange(worker.id, 'attendance', e.target.value)}
-                        className={`w-full py-2 px-3 border rounded-lg text-sm outline-none transition-colors
-                          ${entry.attendance === 'full' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-300' : ''}
-                          ${entry.attendance === 'half' ? 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800/50 dark:text-amber-300' : ''}
-                          ${entry.attendance === 'absent' ? 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-300' : ''}
-                        `}
+                        onChange={(e) =>
+                          handleEntryChange(
+                            worker.id,
+                            "attendance",
+                            e.target.value,
+                          )
+                        }
+                        className={`w-full py-2 px-3 border rounded-lg text-sm outline-none transition-colors ${entry.attendance === "full" ? "bg-success/10 border-emerald-200 text-emerald-800 " : ""} ${entry.attendance === "half" ? "bg-warning/10 border-amber-200 text-amber-800 " : ""} ${entry.attendance === "absent" ? "bg-danger/10 border-red-200 text-red-800 " : ""} `}
                       >
                         <option value="full">حاضر</option>
                         <option value="half">نصف يوم</option>
@@ -225,8 +276,14 @@ export default function DailyEntry() {
                         min="0"
                         placeholder="0"
                         value={entry.allowance}
-                        onChange={(e) => handleEntryChange(worker.id, 'allowance', e.target.value)}
-                        className="w-full px-3 py-2 bg-surface dark:bg-slate-900 border border-border-main dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white transition-colors"
+                        onChange={(e) =>
+                          handleEntryChange(
+                            worker.id,
+                            "allowance",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full px-3 py-2 bg-surface border border-border-main rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main transition-colors"
                       />
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -234,8 +291,14 @@ export default function DailyEntry() {
                         type="number"
                         placeholder="0"
                         value={entry.advancePayment}
-                        onChange={(e) => handleEntryChange(worker.id, 'advancePayment', e.target.value)}
-                        className="w-full px-3 py-2 bg-surface dark:bg-slate-900 border border-border-main dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white transition-colors"
+                        onChange={(e) =>
+                          handleEntryChange(
+                            worker.id,
+                            "advancePayment",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full px-3 py-2 bg-surface border border-border-main rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main transition-colors"
                       />
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -244,8 +307,14 @@ export default function DailyEntry() {
                         min="0"
                         placeholder="0"
                         value={entry.delayMinutes}
-                        onChange={(e) => handleEntryChange(worker.id, 'delayMinutes', e.target.value)}
-                        className="w-full px-3 py-2 bg-surface dark:bg-slate-900 border border-border-main dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white transition-colors"
+                        onChange={(e) =>
+                          handleEntryChange(
+                            worker.id,
+                            "delayMinutes",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full px-3 py-2 bg-surface border border-border-main rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main transition-colors"
                       />
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -253,8 +322,10 @@ export default function DailyEntry() {
                         type="text"
                         placeholder="ملاحظة..."
                         value={entry.note}
-                        onChange={(e) => handleEntryChange(worker.id, 'note', e.target.value)}
-                        className="w-full px-3 py-2 bg-surface dark:bg-slate-900 border border-border-main dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white transition-colors"
+                        onChange={(e) =>
+                          handleEntryChange(worker.id, "note", e.target.value)
+                        }
+                        className="w-full px-3 py-2 bg-surface border border-border-main rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main transition-colors"
                       />
                     </td>
                   </tr>
@@ -263,28 +334,39 @@ export default function DailyEntry() {
             </tbody>
           </table>
         </div>
-
         {/* Mobile Cards */}
-        <div className="lg:hidden divide-y divide-gray-100 dark:divide-slate-700/50">
+        <div className="lg:hidden divide-y divide-border-main">
           {activeWorkers.map((worker) => {
-            const entry = entries[worker.id] || { attendance: 'full', allowance: '', advancePayment: '', delayMinutes: '', note: '' };
+            const entry = entries[worker.id] || {
+              attendance: "full",
+              allowance: "",
+              advancePayment: "",
+              delayMinutes: "",
+              note: "",
+            };
             return (
-              <div key={worker.id} className="p-4 space-y-4 hover:bg-brand-bg dark:hover:bg-slate-700/50 transition-colors">
-                <div className="font-bold text-lg text-text-main dark:text-white border-b border-border-main dark:border-slate-700 pb-2">
+              <div
+                key={worker.id}
+                className="p-4 space-y-4 hover:bg-brand-bg transition-colors"
+              >
+                <div className="font-bold text-lg text-text-main border-b border-border-main pb-2">
                   {worker.name}
                 </div>
-                
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-text-muted dark:text-text-muted mb-1">الحضور</label>
+                    <label className="block text-xs text-text-muted mb-1">
+                      الحضور
+                    </label>
                     <select
                       value={entry.attendance}
-                      onChange={(e) => handleEntryChange(worker.id, 'attendance', e.target.value)}
-                      className={`w-full py-2 px-3 border rounded-lg text-sm outline-none transition-colors
-                        ${entry.attendance === 'full' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-300' : ''}
-                        ${entry.attendance === 'half' ? 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800/50 dark:text-amber-300' : ''}
-                        ${entry.attendance === 'absent' ? 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-300' : ''}
-                      `}
+                      onChange={(e) =>
+                        handleEntryChange(
+                          worker.id,
+                          "attendance",
+                          e.target.value,
+                        )
+                      }
+                      className={`w-full py-2 px-3 border rounded-lg text-sm outline-none transition-colors ${entry.attendance === "full" ? "bg-success/10 border-emerald-200 text-emerald-800 " : ""} ${entry.attendance === "half" ? "bg-warning/10 border-amber-200 text-amber-800 " : ""} ${entry.attendance === "absent" ? "bg-danger/10 border-red-200 text-red-800 " : ""} `}
                     >
                       <option value="full">حاضر</option>
                       <option value="half">نصف يوم</option>
@@ -292,45 +374,73 @@ export default function DailyEntry() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-text-muted dark:text-text-muted mb-1">الصرفة (ر.ي)</label>
+                    <label className="block text-xs text-text-muted mb-1">
+                      الصرفة (ر.ي)
+                    </label>
                     <input
                       type="number"
                       min="0"
                       placeholder="0"
                       value={entry.allowance}
-                      onChange={(e) => handleEntryChange(worker.id, 'allowance', e.target.value)}
-                      className="w-full px-3 py-2 bg-surface dark:bg-slate-900 border border-border-main dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white transition-colors text-sm"
+                      onChange={(e) =>
+                        handleEntryChange(
+                          worker.id,
+                          "allowance",
+                          e.target.value,
+                        )
+                      }
+                      className="w-full px-3 py-2 bg-surface border border-border-main rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main transition-colors text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-text-muted dark:text-text-muted mb-1">السحبيات (ر.ي)</label>
-<input
-                        type="number"
-                        placeholder="0"
-                        value={entry.advancePayment}
-                      onChange={(e) => handleEntryChange(worker.id, 'advancePayment', e.target.value)}
-                      className="w-full px-3 py-2 bg-surface dark:bg-slate-900 border border-border-main dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white transition-colors text-sm"
+                    <label className="block text-xs text-text-muted mb-1">
+                      السحبيات (ر.ي)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      value={entry.advancePayment}
+                      onChange={(e) =>
+                        handleEntryChange(
+                          worker.id,
+                          "advancePayment",
+                          e.target.value,
+                        )
+                      }
+                      className="w-full px-3 py-2 bg-surface border border-border-main rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main transition-colors text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-text-muted dark:text-text-muted mb-1">التأخير (دقيقة)</label>
+                    <label className="block text-xs text-text-muted mb-1">
+                      التأخير (دقيقة)
+                    </label>
                     <input
                       type="number"
                       min="0"
                       placeholder="0"
                       value={entry.delayMinutes}
-                      onChange={(e) => handleEntryChange(worker.id, 'delayMinutes', e.target.value)}
-                      className="w-full px-3 py-2 bg-surface dark:bg-slate-900 border border-border-main dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white transition-colors text-sm"
+                      onChange={(e) =>
+                        handleEntryChange(
+                          worker.id,
+                          "delayMinutes",
+                          e.target.value,
+                        )
+                      }
+                      className="w-full px-3 py-2 bg-surface border border-border-main rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main transition-colors text-sm"
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-xs text-text-muted dark:text-text-muted mb-1">ملاحظات</label>
+                    <label className="block text-xs text-text-muted mb-1">
+                      ملاحظات
+                    </label>
                     <input
                       type="text"
                       placeholder="ملاحظة..."
                       value={entry.note}
-                      onChange={(e) => handleEntryChange(worker.id, 'note', e.target.value)}
-                      className="w-full px-3 py-2 bg-surface dark:bg-slate-900 border border-border-main dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main dark:text-white transition-colors text-sm"
+                      onChange={(e) =>
+                        handleEntryChange(worker.id, "note", e.target.value)
+                      }
+                      className="w-full px-3 py-2 bg-surface border border-border-main rounded-lg focus:ring-2 focus:ring-primary outline-none text-text-main transition-colors text-sm"
                     />
                   </div>
                 </div>
@@ -342,4 +452,3 @@ export default function DailyEntry() {
     </div>
   );
 }
-
